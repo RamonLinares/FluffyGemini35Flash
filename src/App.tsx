@@ -1,0 +1,247 @@
+import React, { useRef, useState, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import confetti from 'canvas-confetti';
+import { useGameState } from './hooks/useGameState';
+import Planet from './components/Planet';
+import Player from './components/Player';
+import GameCamera from './components/GameCamera';
+import QuestManager from './components/QuestManager';
+import HUD from './components/HUD';
+import VirtualJoystick from './components/VirtualJoystick';
+import { SeededRandom } from './utils/noise';
+
+// Ethereal floating stardust particles
+const StardustParticles: React.FC<{ count: number; seed: number; color: string }> = ({ count, seed, color }) => {
+  const pointsRef = useRef<THREE.Points>(null);
+  
+  const [positions] = React.useMemo(() => {
+    const rand = new SeededRandom(seed + 123);
+    const pos = new Float32Array(count * 3);
+    
+    for (let i = 0; i < count; i++) {
+      // Distribute particles in a shell around the planet
+      const theta = rand.next() * Math.PI;
+      const phi = rand.next() * Math.PI * 2;
+      const dist = rand.range(23, 36); // float above base terrain radius (22)
+      
+      pos[i * 3] = dist * Math.sin(theta) * Math.cos(phi);
+      pos[i * 3 + 1] = dist * Math.cos(theta);
+      pos[i * 3 + 2] = dist * Math.sin(theta) * Math.sin(phi);
+    }
+    return [pos];
+  }, [count, seed]);
+
+  useFrame((_, delta: number) => {
+    if (pointsRef.current) {
+      // Slow background planetary rotation of stardust
+      pointsRef.current.rotation.y += delta * 0.012;
+      pointsRef.current.rotation.x += delta * 0.006;
+    }
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[positions, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        color={color}
+        size={0.16}
+        transparent
+        opacity={0.65}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
+  );
+};
+
+export const App: React.FC = () => {
+  const gameState = useGameState();
+  const {
+    planetConfig,
+    planetIndex,
+    quests,
+    color,
+    accessory,
+    syncCode,
+    allQuestsCompleted,
+    updateQuestProgress,
+    warpNext,
+    loadCode,
+    selectColor,
+    selectAccessory,
+    resetGame,
+    warping,
+    warpMessage,
+    customColors,
+    colorIndex,
+    accessories,
+    accessoryIndex,
+  } = gameState;
+
+  // Real-time player 3D position reference used by Camera and QuestManager
+  const playerPositionRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 26, 0));
+
+  // Device detection for virtual joystick
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768 || ('ontouchstart' in window));
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Celebrate with pastel confetti on completing all quests
+  useEffect(() => {
+    if (allQuestsCompleted) {
+      // Fire confetti bursts
+      const duration = 2.5 * 1000;
+      const end = Date.now() + duration;
+
+      const frame = () => {
+        confetti({
+          particleCount: 4,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7', '#c7ceea']
+        });
+        confetti({
+          particleCount: 4,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7', '#c7ceea']
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+    }
+  }, [allQuestsCompleted]);
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+      {/* 3D WebGL Canvas Rendering */}
+      <Canvas
+        shadows
+        camera={{ fov: 50, near: 0.1, far: 200 }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', outline: 'none' }}
+      >
+        {/* Sky Background Color matching the planet theme */}
+        <color attach="background" args={[planetConfig.theme.skyColor]} />
+        
+        {/* Soft atmospheric fog */}
+        <fog attach="fog" args={[planetConfig.theme.fogColor, 15, 60]} />
+
+        {/* Ethereal Lighting Systems */}
+        <ambientLight 
+          intensity={1.1} 
+          color={planetConfig.theme.skyColor} 
+        />
+        
+        <directionalLight
+          position={[12, 28, 12]}
+          intensity={1.4}
+          color="#ffffff"
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-camera-far={70}
+          shadow-camera-left={-20}
+          shadow-camera-right={20}
+          shadow-camera-top={20}
+          shadow-camera-bottom={-20}
+          shadow-bias={-0.0006}
+        />
+        
+        {/* Soft bounce light from the bottom sphere */}
+        <directionalLight 
+          position={[-10, -25, -10]} 
+          intensity={0.6} 
+          color={planetConfig.theme.accentColor} 
+        />
+
+        {/* Ethereal particle clouds */}
+        <StardustParticles 
+          count={70} 
+          seed={planetConfig.seed} 
+          color={planetConfig.theme.accentColor} 
+        />
+
+        {/* Procedural Planet Mesh */}
+        <Planet 
+          seed={planetConfig.seed} 
+          theme={planetConfig.theme} 
+        />
+
+        {/* Fluffy Player Character (Ball) */}
+        <Player
+          seed={planetConfig.seed}
+          color={color}
+          accessory={accessory}
+          playerPositionRef={playerPositionRef}
+          onQuestUpdate={updateQuestProgress}
+        />
+
+        {/* Quest Manager to handle active objectives and interactions */}
+        <QuestManager
+          seed={planetConfig.seed}
+          quests={quests}
+          playerPositionRef={playerPositionRef}
+          onQuestUpdate={updateQuestProgress}
+        />
+
+        {/* Orbit Camera follow locked to planetary coordinates */}
+        <GameCamera 
+          playerPositionRef={playerPositionRef} 
+        />
+      </Canvas>
+
+      {/* 2D Glassmorphic HUD */}
+      <HUD
+        planetName={planetConfig.name}
+        planetIndex={planetIndex}
+        quests={quests}
+        color={color}
+        accessory={accessory}
+        customColors={customColors}
+        colorIndex={colorIndex}
+        accessories={accessories}
+        accessoryIndex={accessoryIndex}
+        syncCode={syncCode}
+        allQuestsCompleted={allQuestsCompleted}
+        warpNext={warpNext}
+        loadCode={loadCode}
+        selectColor={selectColor}
+        selectAccessory={selectAccessory}
+        resetGame={resetGame}
+        playerPositionRef={playerPositionRef}
+        seed={planetConfig.seed}
+      />
+
+      {/* Mobile Virtual Joystick Overlay */}
+      {isMobile && <VirtualJoystick />}
+
+      {/* Warp Transition Screen (Entering Stargate) */}
+      {warping && (
+        <div className="warp-overlay">
+          <div className="warp-spinner" />
+          <div className="warp-message">{warpMessage}</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default App;

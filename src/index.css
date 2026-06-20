@@ -1,0 +1,633 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Quicksand:wght@400;600;700&display=swap');
+
+:root {
+  --font-primary: 'Outfit', sans-serif;
+  --font-accent: 'Quicksand', sans-serif;
+  --bg-glass: rgba(255, 255, 255, 0.45);
+  --border-glass: rgba(255, 255, 255, 0.6);
+  --shadow-glass: 0 8px 32px 0 rgba(100, 110, 140, 0.12);
+  --text-color: #4a4a5a;
+  --text-muted: #7d7d91;
+  --accent-pastel: #ffb7b2;
+  --transition-speed: 0.3s;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: var(--font-primary);
+  color: var(--text-color);
+  background-color: #fafafc;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: 20px;
+  color: var(--text-color);
+}
+
+.glass-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 4px 12px rgba(100, 110, 140, 0.08);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-family: var(--font-accent);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all var(--transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glass-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 6px 16px rgba(100, 110, 140, 0.15);
+}
+
+.glass-btn:active {
+  transform: translateY(1px);
+}
+
+.glass-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Game Interface Layout */
+.game-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Let clicks pass through to Three.js canvas */
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.interactive {
+  pointer-events: auto; /* Re-enable clicks for buttons/menus */
+}
+
+/* Top Bar: Planet Name and Settings */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.planet-card {
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.planet-title {
+  font-family: var(--font-accent);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #3b3b4f;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.planet-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* Settings Menu Button */
+.settings-menu-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+/* Quest Log HUD (Floating Left or Right) */
+.hud-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+  width: 100%;
+  align-self: flex-start;
+}
+
+.quest-log-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.quest-log-card.collapsed {
+  gap: 0px;
+}
+
+.mobile-chevron {
+  display: none;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .mobile-chevron {
+    display: inline-block;
+  }
+}
+
+.quest-log-header {
+  font-family: var(--font-accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-bottom: 2px dashed rgba(0,0,0,0.06);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quest-progress-summary {
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.quest-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  opacity: 1;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-top 0.3s ease;
+}
+
+.quest-log-card.collapsed .quest-list {
+  max-height: 0px;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.quest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.2s;
+}
+
+.quest-item.completed {
+  background: rgba(200, 245, 220, 0.5);
+  color: #2e7d32;
+  text-decoration: line-through;
+}
+
+.quest-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  flex-shrink: 0;
+}
+
+.quest-item.completed .quest-icon {
+  background: #a5d6a7;
+  color: white;
+}
+
+.quest-details {
+  flex-grow: 1;
+}
+
+.quest-title-text {
+  font-weight: 600;
+}
+
+.quest-counter {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  float: right;
+}
+
+.quest-item.completed .quest-counter {
+  color: #2e7d32;
+}
+
+/* Mobile Virtual Joystick Overlay */
+.joystick-area {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+.joystick-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 4px 12px rgba(100, 110, 140, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  cursor: grab;
+  position: absolute;
+  transition: transform 0.05s ease;
+}
+
+/* Right Side - Actions & Customize */
+.action-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  align-self: flex-end;
+  max-width: 320px;
+  width: 100%;
+}
+
+/* Settings & Customize Overlay Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(100, 110, 140, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 420px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal-title {
+  font-family: var(--font-accent);
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* Customize Options */
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.color-dot:hover {
+  transform: scale(1.1);
+}
+
+.color-dot.active {
+  border-color: white;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px #4a4a5a;
+}
+
+.accessory-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.accessory-option {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(0,0,0,0.05);
+  text-transform: capitalize;
+}
+
+.accessory-option.active {
+  background: var(--text-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Sync Code Input */
+.sync-code-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255,255,255,0.4);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed rgba(0,0,0,0.08);
+}
+
+.sync-code-value {
+  font-family: monospace;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 1px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.sync-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sync-input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+  font-family: monospace;
+  font-size: 0.9rem;
+  text-align: center;
+  outline: none;
+}
+
+/* Stargate Warp Alert Panel */
+.warp-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle, rgba(255, 235, 235, 0.9) 0%, rgba(230, 242, 255, 0.95) 100%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: warpPulse 1.5s infinite alternate ease-in-out;
+}
+
+.warp-spinner {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px dashed #ffb7b2;
+  animation: spin 3s linear infinite;
+  margin-bottom: 20px;
+}
+
+.warp-message {
+  font-family: var(--font-accent);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #4a4a5a;
+  text-align: center;
+}
+
+/* Success Banner (Warp Ready) */
+.warp-ready-banner {
+  background: rgba(220, 245, 225, 0.9);
+  border: 1px solid rgba(46, 125, 50, 0.3);
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: center;
+  animation: float 2s ease-in-out infinite;
+}
+
+.warp-ready-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.warp-ready-btn {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  font-size: 0.85rem;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+  transition: all 0.2s;
+}
+
+.warp-ready-btn:hover {
+  transform: scale(1.05);
+  background: #1b5e20;
+}
+
+/* Desktop controls info overlay */
+.desktop-controls-info {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes warpPulse {
+  from { opacity: 0.85; filter: blur(0px); }
+  to { opacity: 0.98; filter: blur(2px); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .game-ui {
+    padding: 12px;
+  }
+  
+  .hud-side-panel {
+    max-width: 280px;
+    width: auto;
+  }
+
+  .action-area {
+    max-width: 100%;
+    align-items: center;
+  }
+
+  .quest-log-card {
+    border-radius: 14px;
+    padding: 12px;
+  }
+  
+  .desktop-controls-info {
+    display: none;
+  }
+}
+
+/* Radar Mini-Map Style */
+.radar-container {
+  position: absolute;
+  top: 76px;
+  right: 20px;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .radar-container {
+    top: 70px;
+    right: 12px;
+    padding: 4px;
+  }
+  .radar-container canvas {
+    width: 80px !important;
+    height: 80px !important;
+  }
+}
