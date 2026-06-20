@@ -583,13 +583,23 @@ body {
   }
   
   .hud-side-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
     max-width: 280px;
     width: auto;
+    z-index: 15;
   }
 
   .action-area {
-    max-width: 100%;
-    align-items: center;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    max-width: calc(100% - 320px);
+    width: auto;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 15;
   }
 
   .quest-log-card {

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import confetti from 'canvas-confetti';
@@ -8,7 +8,6 @@ import Player from './components/Player';
 import GameCamera from './components/GameCamera';
 import QuestManager from './components/QuestManager';
 import HUD from './components/HUD';
-import VirtualJoystick from './components/VirtualJoystick';
 import { SeededRandom } from './utils/noise';
 
 // Ethereal floating stardust particles
@@ -87,17 +86,7 @@ export const App: React.FC = () => {
   // Real-time player 3D position reference used by Camera and QuestManager
   const playerPositionRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 26, 0));
 
-  // Device detection for virtual joystick
-  const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768 || ('ontouchstart' in window));
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Celebrate with pastel confetti on completing all quests
   useEffect(() => {
@@ -230,8 +219,7 @@ export const App: React.FC = () => {
         seed={planetConfig.seed}
       />
 
-      {/* Mobile Virtual Joystick Overlay */}
-      {isMobile && <VirtualJoystick />}
+
 
       {/* Warp Transition Screen (Entering Stargate) */}
       {warping && (

@@ -202,28 +202,73 @@ export const Player: React.FC<PlayerProps> = ({
       if (e.key === ' ' || key === 'spacebar') window.gameInput.keys.space = false;
     };
 
-    // Mobile screen tap (right side) to jump
+    // Fullscreen touch controls for mobile playability
     const handleTouchStart = (e: TouchEvent) => {
+      if ((e.target as HTMLElement).closest('.interactive')) return;
+      
+      if (e.touches.length > 1) {
+        // Multi-touch: jump!
+        if (window.gameInput) {
+          window.gameInput.keys.space = true;
+          // Release space after a short delay so physics integrates it
+          setTimeout(() => {
+            if (window.gameInput) window.gameInput.keys.space = false;
+          }, 120);
+        }
+        return;
+      }
+      handleTouchUpdate(e);
+    };
+
+    const handleTouchUpdate = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      if ((e.target as HTMLElement).closest('.interactive')) return;
+
       const touch = e.touches[0];
-      // If tapped on the right half of the screen, trigger space
-      if (touch.clientX > window.innerWidth / 2) {
-        if (window.gameInput) window.gameInput.keys.space = true;
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      const dx = touch.clientX - centerX;
+      const dy = touch.clientY - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 15) {
+        if (window.gameInput) {
+          window.gameInput.joystick = {
+            x: dx / distance,
+            y: -dy / distance, // Invert Y so touching top goes forward
+            active: true,
+          };
+        }
+      } else {
+        if (window.gameInput) {
+          window.gameInput.joystick = { x: 0, y: 0, active: false };
+        }
       }
     };
 
-    const handleTouchEnd = () => {
-      if (window.gameInput) window.gameInput.keys.space = false;
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0) {
+        if (window.gameInput) {
+          window.gameInput.joystick = { x: 0, y: 0, active: false };
+          window.gameInput.keys.space = false;
+        }
+      } else {
+        handleTouchUpdate(e);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchUpdate, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchUpdate);
       window.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
