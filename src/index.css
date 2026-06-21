@@ -515,7 +515,7 @@ body {
   text-align: center;
   z-index: 25;
   box-shadow: 0 8px 32px rgba(46, 125, 50, 0.15);
-  animation: float 2.5s ease-in-out infinite;
+  animation: floatCentered 2.5s ease-in-out infinite;
 }
 
 .warp-ready-text {
@@ -581,6 +581,12 @@ body {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-6px); }
   100% { transform: translateY(0px); }
+}
+
+@keyframes floatCentered {
+  0% { transform: translateX(-50%) translateY(0px); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+  100% { transform: translateX(-50%) translateY(0px); }
 }
 
 /* Responsive Overrides */
