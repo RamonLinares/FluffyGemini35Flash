@@ -589,112 +589,6 @@ body {
   100% { transform: translateX(-50%) translateY(0px); }
 }
 
-/* Responsive Overrides */
-@media (max-width: 768px) {
-  .game-ui {
-    padding: 12px;
-  }
-  
-  /* Compact Top Bar on Mobile */
-  .top-bar {
-    align-items: center;
-    gap: 4px;
-    padding: 0 4px;
-  }
-
-  .planet-pill-card {
-    padding: 4px 10px 4px 4px;
-    gap: 6px;
-  }
-  
-  .planet-pill-icon-container {
-    width: 26px;
-    height: 26px;
-    font-size: 0.9rem;
-  }
-  
-  .planet-pill-title {
-    font-size: 0.8rem;
-    max-width: 80px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .quest-tracker-center {
-    gap: 2px;
-  }
-  
-  .quest-tracker-title {
-    font-size: 0.7rem;
-    letter-spacing: 0.4px;
-  }
-  
-  .quest-tracker-diamonds {
-    padding: 4px 8px;
-    gap: 2px;
-  }
-  
-  .tracker-diamond-circle {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .tracker-diamond-star {
-    font-size: 0.6rem;
-  }
-  
-  .tracker-connector {
-    font-size: 5px;
-    margin: 0;
-  }
-
-  .top-right-buttons-container {
-    gap: 4px;
-  }
-  
-  .code-sync-btn {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    border-radius: 14px;
-  }
-  
-  .hud-round-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-  
-  .hud-side-panel {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    max-width: 280px;
-    width: auto;
-    z-index: 15;
-  }
-
-  .action-area {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    max-width: calc(100% - 320px);
-    width: auto;
-    align-items: flex-end;
-    pointer-events: none;
-    z-index: 15;
-  }
-
-  .quest-log-card {
-    border-radius: 14px;
-    padding: 12px;
-  }
-  
-  .desktop-controls-info {
-    display: none;
-  }
-}
-
 /* Radar Mini-Map Style */
 .radar-container {
   position: absolute;
@@ -711,18 +605,6 @@ body {
   -webkit-backdrop-filter: blur(12px);
   z-index: 10;
   pointer-events: auto;
-}
-
-@media (max-width: 768px) {
-  .radar-container {
-    top: 70px;
-    right: 12px;
-    padding: 4px;
-  }
-  .radar-container canvas {
-    width: 80px !important;
-    height: 80px !important;
-  }
 }
 
 /* --- Mockup HUD Revamp Styling --- */
@@ -900,7 +782,122 @@ body {
   display: none;
 }
 
+/* Responsive Overrides (Mobile) */
 @media (max-width: 768px) {
+  .game-ui {
+    padding: 12px;
+  }
+  
+  .hud-side-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    max-width: 280px;
+    width: auto;
+    z-index: 15;
+  }
+
+  .action-area {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    max-width: calc(100% - 320px);
+    width: auto;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  .quest-log-card {
+    border-radius: 14px;
+    padding: 12px;
+  }
+  
+  .desktop-controls-info {
+    display: none;
+  }
+
+  .radar-container {
+    top: 70px;
+    right: 12px;
+    padding: 4px;
+  }
+  
+  .radar-container canvas {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  /* Compact Top Bar on Mobile */
+  .top-bar {
+    align-items: center;
+    gap: 4px;
+    padding: 0 4px;
+  }
+
+  .planet-pill-card {
+    padding: 4px 8px 4px 4px;
+    gap: 6px;
+  }
+  
+  .planet-pill-icon-container {
+    width: 26px;
+    height: 26px;
+    font-size: 0.9rem;
+  }
+  
+  .planet-pill-title {
+    font-size: 0.8rem;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .quest-tracker-center {
+    gap: 2px;
+  }
+  
+  .quest-tracker-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.4px;
+  }
+  
+  .quest-tracker-diamonds {
+    padding: 4px 8px;
+    gap: 2px;
+  }
+  
+  .tracker-diamond-circle {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .tracker-diamond-star {
+    font-size: 0.6rem;
+  }
+  
+  .tracker-connector {
+    font-size: 5px;
+    margin: 0;
+  }
+
+  .top-right-buttons-container {
+    gap: 4px;
+  }
+  
+  .code-sync-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border-radius: 14px;
+  }
+  
+  .hud-round-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
   .mobile-jump-paw-btn {
     display: flex;
     position: absolute;
