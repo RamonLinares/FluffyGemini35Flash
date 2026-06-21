@@ -262,25 +262,25 @@ export const HUD: React.FC<HUDProps> = ({
         </div>
       </div>
 
-      {/* Bottom Area: Controls Info & Warp Actions */}
+      {/* Bottom Area: Controls Info */}
       <div className="action-area">
         {/* Desktop Controls Helper */}
         <div className="desktop-controls-info">
           <span>Keyboard: WASD / Arrow Keys to move • SPACE to jump</span>
         </div>
-
-        {/* Warp Button when all quests are complete */}
-        {allQuestsCompleted && (
-          <div className="warp-ready-banner glass-panel interactive" onClick={preventProp}>
-            <span className="warp-ready-text">
-              ✨ Planet Harmony Achieved! ✨
-            </span>
-            <button className="warp-ready-btn" onClick={warpNext}>
-              Warp to Next Planet <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Warp Button when all quests are complete */}
+      {allQuestsCompleted && (
+        <div className="warp-ready-banner glass-panel interactive" onClick={preventProp}>
+          <span className="warp-ready-text">
+            ✨ Planet Harmony Achieved! ✨
+          </span>
+          <button className="warp-ready-btn" onClick={warpNext}>
+            Warp to Next Planet <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      )}
 
       {/* Customize & Save Sync Settings Modal */}
       {showSettings && (
