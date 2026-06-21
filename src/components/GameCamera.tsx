@@ -66,7 +66,7 @@ export const GameCamera: React.FC<GameCameraProps> = ({ playerPositionRef }) => 
     };
   }, [gl]);
 
-  useFrame(() => {
+  useFrame((state) => {
     const playerPos = playerPositionRef.current;
     
     // Ignore updates if player position is not loaded yet (at origin)
@@ -90,14 +90,17 @@ export const GameCamera: React.FC<GameCameraProps> = ({ playerPositionRef }) => 
     // Spherical coordinate offsets relative to the player
     const hAngle = yaw.current;
     const vAngle = pitch.current;
-    const dist = distance.current;
+    
+    // Scale distance based on viewport aspect ratio to prevent close clipping in portrait mode
+    const isPortrait = state.size.width < state.size.height;
+    const finalDist = distance.current * (isPortrait ? 1.5 : 1.0);
 
     // Offset in local coordinate terms
     const localOffset = new THREE.Vector3(
       Math.sin(hAngle) * Math.cos(vAngle),
       Math.sin(vAngle),
       Math.cos(hAngle) * Math.cos(vAngle)
-    ).multiplyScalar(dist);
+    ).multiplyScalar(finalDist);
 
     // Map the local coordinate offset back to world space
     const worldOffset = new THREE.Vector3()
