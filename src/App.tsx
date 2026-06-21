@@ -123,7 +123,7 @@ export const App: React.FC = () => {
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       {/* 3D WebGL Canvas Rendering */}
       <Canvas
-        shadows
+        shadows={{ type: THREE.PCFShadowMap }}
         camera={{ fov: 50, near: 0.1, far: 200 }}
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', outline: 'none' }}
       >
