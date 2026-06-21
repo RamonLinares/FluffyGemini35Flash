@@ -67,6 +67,35 @@ const Crystal: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion;
   );
 };
 
+// Floating Sky Island (Rock base + glowing crystal on top, floating in the air)
+const FloatingIsland: React.FC<{ position: THREE.Vector3; scale: number; color: string }> = ({
+  position,
+  scale,
+  color,
+}) => {
+  return (
+    <group position={position} scale={[scale, scale, scale]}>
+      {/* Rock base */}
+      <mesh castShadow receiveShadow>
+        <dodecahedronGeometry args={[0.8, 1]} />
+        <meshStandardMaterial color="#90a4ae" flatShading roughness={0.9} />
+      </mesh>
+      {/* Little crystal growing on top */}
+      <mesh position={[0, 0.7, 0]} rotation={[0.2, 0.4, 0.1]} castShadow>
+        <octahedronGeometry args={[0.35, 0]} />
+        <meshStandardMaterial 
+          color={color} 
+          emissive={color} 
+          emissiveIntensity={0.6} 
+          roughness={0.1} 
+          metalness={0.8}
+          flatShading
+        />
+      </mesh>
+    </group>
+  );
+};
+
 // Ethereal Clouds orbiting the planet
 const Clouds: React.FC<{ radius: number; seed: number; color: string }> = ({ radius, seed, color }) => {
   const cloudsRef = useRef<THREE.Group>(null);
@@ -253,6 +282,27 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
     return list;
   }, [seed, theme]);
 
+  // 3. Generate Floating Sky Islands underneath the planet (Seeded Random)
+  const floatingIslands = useMemo(() => {
+    const rand = new SeededRandom(seed + 888);
+    const count = 6;
+    const items = [];
+    for (let i = 0; i < count; i++) {
+      // Place them in space below the planet center (Y is negative, around -34 to -23)
+      const x = rand.range(-16, 16);
+      const y = rand.range(-34, -23);
+      const z = rand.range(-16, 16);
+      const scale = rand.range(0.9, 1.8);
+      items.push({
+        id: `island_${i}`,
+        position: new THREE.Vector3(x, y, z),
+        scale,
+        color: theme.accentColor,
+      });
+    }
+    return items;
+  }, [seed, theme]);
+
   return (
     <group>
       {/* Procedural Deformed Terrain Mesh */}
@@ -304,6 +354,16 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
 
       {/* Slow floating clouds */}
       <Clouds radius={baseRadius} seed={seed} color="#ffffff" />
+
+      {/* Floating islands in the sky underneath the planet */}
+      {floatingIslands.map((island) => (
+        <FloatingIsland
+          key={island.id}
+          position={island.position}
+          scale={island.scale}
+          color={island.color}
+        />
+      ))}
     </group>
   );
 };

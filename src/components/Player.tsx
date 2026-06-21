@@ -278,6 +278,7 @@ export const Player: React.FC<PlayerProps> = ({
     const dt = Math.min(delta, 0.1);
     
     if (!containerRef.current || !visualGroupRef.current) return;
+    if (typeof window !== 'undefined' && (window as any).gamePaused) return;
 
     // --- 1. SPHERICAL GRAVITY ---
     // The "up" vector is pointing straight out from the planet center to the player
@@ -508,27 +509,23 @@ export const Player: React.FC<PlayerProps> = ({
           <meshStandardMaterial color="#ffffff" roughness={0.8} />
         </mesh>
 
-        {/* Cute Snout (White base with dark nose and cute w-mouth) */}
-        <group position={[0, -0.05, 0.74]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.14, 12, 12]} scale={[1.3, 0.85, 0.7]} />
-            <meshStandardMaterial color="#ffffff" roughness={0.9} />
-          </mesh>
+        {/* Cute Face Features (Flat on the surface like the reference image) */}
+        <group position={[0, -0.03, 0.74]}>
           {/* Nose */}
-          <mesh position={[0, 0.04, 0.12]} castShadow>
-            <sphereGeometry args={[0.04, 8, 8]} scale={[1.4, 0.8, 0.8]} />
+          <mesh position={[0, 0.03, 0.01]} castShadow>
+            <sphereGeometry args={[0.024, 8, 8]} scale={[1.4, 0.8, 0.8]} />
             <meshStandardMaterial color="#3e2723" roughness={0.5} />
           </mesh>
           {/* Mouth (Cute w-shape) */}
-          <group position={[0, -0.03, 0.10]}>
+          <group position={[0, -0.015, 0.01]}>
             {/* Left curve */}
-            <mesh position={[-0.03, 0, 0]} rotation={[0.1, 0, Math.PI]}>
-              <torusGeometry args={[0.03, 0.008, 4, 10, Math.PI]} />
+            <mesh position={[-0.024, 0, 0]} rotation={[0, 0, Math.PI]}>
+              <torusGeometry args={[0.024, 0.007, 4, 10, Math.PI]} />
               <meshStandardMaterial color="#3e2723" roughness={0.5} />
             </mesh>
             {/* Right curve */}
-            <mesh position={[0.03, 0, 0]} rotation={[0.1, 0, Math.PI]}>
-              <torusGeometry args={[0.03, 0.008, 4, 10, Math.PI]} />
+            <mesh position={[0.024, 0, 0]} rotation={[0, 0, Math.PI]}>
+              <torusGeometry args={[0.024, 0.007, 4, 10, Math.PI]} />
               <meshStandardMaterial color="#3e2723" roughness={0.5} />
             </mesh>
           </group>
@@ -558,19 +555,9 @@ export const Player: React.FC<PlayerProps> = ({
           <meshStandardMaterial color={color} roughness={0.8} />
         </mesh>
 
-        {/* Anime Eyes (Multi-layered: eyelash, socket, iris, pupil, dual sparkles) */}
+        {/* Anime Eyes (Multi-layered: socket, iris, pupil, dual sparkles) */}
         {/* Left Eye */}
         <group position={[-0.2, 0.12, 0.71]} rotation={[0, -0.25, 0]}>
-          {/* Eyelash Arch */}
-          <mesh position={[0, 0.11, 0.02]} rotation={[0.1, 0, Math.PI * 0.1]} castShadow>
-            <torusGeometry args={[0.085, 0.016, 6, 12, Math.PI * 0.8]} />
-            <meshStandardMaterial color="#1a1a24" roughness={0.6} />
-          </mesh>
-          {/* Eyelash Flick */}
-          <mesh position={[-0.08, 0.06, 0.03]} rotation={[0.2, 0.1, -0.6]} castShadow>
-            <coneGeometry args={[0.015, 0.07, 4]} />
-            <meshStandardMaterial color="#1a1a24" roughness={0.6} />
-          </mesh>
           {/* Socket Base */}
           <mesh castShadow>
             <sphereGeometry args={[0.08, 16, 16]} scale={[1, 1.3, 0.5]} />
@@ -600,16 +587,6 @@ export const Player: React.FC<PlayerProps> = ({
 
         {/* Right Eye */}
         <group position={[0.2, 0.12, 0.71]} rotation={[0, 0.25, 0]}>
-          {/* Eyelash Arch (Mirrored scale) */}
-          <mesh position={[0, 0.11, 0.02]} rotation={[0.1, 0, Math.PI * 0.1]} scale={[-1, 1, 1]} castShadow>
-            <torusGeometry args={[0.085, 0.016, 6, 12, Math.PI * 0.8]} />
-            <meshStandardMaterial color="#1a1a24" roughness={0.6} />
-          </mesh>
-          {/* Eyelash Flick (Mirrored) */}
-          <mesh position={[0.08, 0.06, 0.03]} rotation={[0.2, -0.1, 0.6]} castShadow>
-            <coneGeometry args={[0.015, 0.07, 4]} />
-            <meshStandardMaterial color="#1a1a24" roughness={0.6} />
-          </mesh>
           {/* Socket Base */}
           <mesh castShadow>
             <sphereGeometry args={[0.08, 16, 16]} scale={[1, 1.3, 0.5]} />

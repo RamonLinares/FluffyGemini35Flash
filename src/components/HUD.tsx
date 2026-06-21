@@ -8,14 +8,16 @@ import {
   faFaceSmile, 
   faMountain, 
   faMusic, 
-  faGear, 
   faSync, 
   faCopy, 
   faRotateLeft, 
   faTimes, 
   faChevronRight,
   faChevronDown,
-  faChevronUp
+  faChevronUp,
+  faPause,
+  faVolumeHigh,
+  faVolumeMute
 } from '@fortawesome/free-solid-svg-icons';
 import type { Quest } from '../types';
 
@@ -51,7 +53,7 @@ interface HUDProps {
 
 export const HUD: React.FC<HUDProps> = ({
   planetName,
-  planetIndex,
+  planetIndex: _planetIndex,
   quests,
   color: _color,
   accessory: _accessory,
@@ -79,6 +81,50 @@ export const HUD: React.FC<HUDProps> = ({
   const [copied, setCopied] = useState(false);
 
   const completedQuestsCount = quests.filter((q) => q.completed).length;
+
+  const [audioMuted, setAudioMuted] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fluffy_audio_muted');
+      const isMuted = saved === 'true';
+      (window as any).audioMuted = isMuted;
+      return isMuted;
+    }
+    return false;
+  });
+
+  const [gamePaused, setGamePaused] = useState(false);
+
+  const toggleAudioMuted = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextVal = !audioMuted;
+    setAudioMuted(nextVal);
+    if (typeof window !== 'undefined') {
+      (window as any).audioMuted = nextVal;
+      localStorage.setItem('fluffy_audio_muted', String(nextVal));
+    }
+  };
+
+  const toggleGamePaused = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextVal = !gamePaused;
+    setGamePaused(nextVal);
+    if (typeof window !== 'undefined') {
+      (window as any).gamePaused = nextVal;
+    }
+  };
+
+  const handleMobileJump = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    if (e.cancelable) e.preventDefault();
+    if (typeof window !== 'undefined' && (window as any).gameInput) {
+      (window as any).gameInput.keys.space = true;
+      setTimeout(() => {
+        if ((window as any).gameInput) {
+          (window as any).gameInput.keys.space = false;
+        }
+      }, 120);
+    }
+  };
 
   const handleCopyCode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -114,18 +160,60 @@ export const HUD: React.FC<HUDProps> = ({
     <div className="game-ui">
       {/* Top Bar */}
       <div className="top-bar">
-        <div className="planet-card glass-panel interactive" onClick={preventProp}>
-          <span className="planet-subtitle">Planet {planetIndex + 1}</span>
-          <span className="planet-title">{planetName}</span>
+        {/* Top Left: Planet Pill Card */}
+        <div className="planet-pill-card glass-panel interactive" onClick={preventProp}>
+          <div className="planet-pill-icon-container">
+            <span>🪐</span>
+          </div>
+          <span className="planet-pill-title">{planetName}</span>
         </div>
 
-        <button 
-          className="settings-menu-btn glass-btn interactive"
-          onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
-          title="Customize & Save"
-        >
-          <FontAwesomeIcon icon={faGear} />
-        </button>
+        {/* Top Center: Quest Diamond Tracker */}
+        <div className="quest-tracker-center interactive" onClick={preventProp}>
+          <div className="quest-tracker-title">{quests.length} Quests</div>
+          <div className="quest-tracker-diamonds">
+            {quests.map((quest, idx) => (
+              <React.Fragment key={quest.id}>
+                {idx > 0 && <span className="tracker-connector">⬥</span>}
+                <div 
+                  className={`tracker-diamond-wrapper ${quest.completed ? 'completed' : ''}`}
+                  title={`${quest.title}: ${quest.completed ? 'Completed' : `${quest.currentCount}/${quest.targetCount}`}`}
+                >
+                  <div className="tracker-diamond-circle">
+                    <span className="tracker-diamond-star">✦</span>
+                  </div>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Right: Buttons Group */}
+        <div className="top-right-buttons-container">
+          <button 
+            className="code-sync-btn interactive"
+            onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
+            title="Stardust Customize & Save Sync Code"
+          >
+            <span>⭐ CODE</span>
+          </button>
+          
+          <button 
+            className="hud-round-btn interactive"
+            onClick={toggleGamePaused}
+            title={gamePaused ? "Resume Game" : "Pause Game"}
+          >
+            <FontAwesomeIcon icon={faPause} />
+          </button>
+
+          <button 
+            className="hud-round-btn interactive"
+            onClick={toggleAudioMuted}
+            title={audioMuted ? "Unmute Sound" : "Mute Sound"}
+          >
+            <FontAwesomeIcon icon={audioMuted ? faVolumeMute : faVolumeHigh} />
+          </button>
+        </div>
       </div>
 
       {/* Radar Mini-Map (Floating Top-Right below settings) */}
@@ -290,6 +378,47 @@ export const HUD: React.FC<HUDProps> = ({
                 <FontAwesomeIcon icon={faRotateLeft} /> Reset Progress
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Jump Paw Button (Visible only on mobile via CSS) */}
+      <button 
+        className="mobile-jump-paw-btn interactive"
+        onTouchStart={handleMobileJump}
+        onClick={handleMobileJump}
+        title="Jump"
+      >
+        🐾
+      </button>
+
+      {/* Game Paused Overlay */}
+      {gamePaused && (
+        <div 
+          className="paused-overlay interactive" 
+          onClick={(e) => {
+            e.stopPropagation();
+            setGamePaused(false);
+            if (typeof window !== 'undefined') {
+              (window as any).gamePaused = false;
+            }
+          }}
+        >
+          <div className="paused-content glass-panel" onClick={(e) => e.stopPropagation()}>
+            <h2 className="paused-title">Game Paused</h2>
+            <p className="paused-subtitle">Tap below or anywhere outside to resume</p>
+            <button 
+              className="paused-resume-btn" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setGamePaused(false);
+                if (typeof window !== 'undefined') {
+                  (window as any).gamePaused = false;
+                }
+              }}
+            >
+              Resume Game
+            </button>
           </div>
         </div>
       )}

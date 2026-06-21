@@ -13,7 +13,7 @@ interface QuestManagerProps {
 
 // Synth Sound Player Helper
 const playSynthSound = (type: 'collect' | 'beacon' | 'find' | 'home' | 'music') => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || (window as any).audioMuted) return;
   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
   if (!AudioCtx) return;
 
@@ -129,6 +129,7 @@ export const QuestManager: React.FC<QuestManagerProps> = ({
 
   // --- 2. COLLISION & INTERACTION LOOP ---
   useFrame((state, delta) => {
+    if (typeof window !== 'undefined' && (window as any).gamePaused) return;
     const playerPos = playerPositionRef.current;
     if (playerPos.lengthSq() < 1) return;
 
@@ -387,23 +388,68 @@ export const QuestManager: React.FC<QuestManagerProps> = ({
         </group>
       )}
 
-      {/* 4. Home Portal Ring */}
+      {/* 4. Home Portal Ring (Stargate Archway) */}
       <group position={locations.homePortal} quaternion={locations.homePortalQuat}>
-        {/* Glow Ring */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-          <ringGeometry args={[1.2, 1.4, 16]} />
-          <meshBasicMaterial color="#b2ebf2" transparent opacity={0.8} side={THREE.DoubleSide} />
+        {/* Portal Steps / Base */}
+        <mesh position={[0, 0.05, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[1.3, 1.4, 0.1, 16]} />
+          <meshStandardMaterial color="#b0bec5" roughness={0.9} flatShading />
         </mesh>
-        {/* Swirling particle plane */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-          <ringGeometry args={[0, 1.2, 16]} />
-          <meshBasicMaterial color="#e0f7fa" transparent opacity={0.35} side={THREE.DoubleSide} />
+        <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[1.1, 1.2, 0.1, 16]} />
+          <meshStandardMaterial color="#90a4ae" roughness={0.9} flatShading />
         </mesh>
-        {/* Ethereal portal pillar */}
+
+        {/* Stone Arch Left Pillar */}
+        <mesh position={[-1.0, 1.1, 0]} castShadow>
+          <boxGeometry args={[0.25, 2.0, 0.25]} />
+          <meshStandardMaterial color="#cfd8dc" roughness={0.8} flatShading />
+        </mesh>
+        {/* Stone Arch Right Pillar */}
+        <mesh position={[1.0, 1.1, 0]} castShadow>
+          <boxGeometry args={[0.25, 2.0, 0.25]} />
+          <meshStandardMaterial color="#cfd8dc" roughness={0.8} flatShading />
+        </mesh>
+        {/* Stone Arch Top Beam */}
+        <mesh position={[0, 2.1, 0]} castShadow>
+          <boxGeometry args={[2.3, 0.25, 0.35]} />
+          <meshStandardMaterial color="#cfd8dc" roughness={0.8} flatShading />
+        </mesh>
+
+        {/* Glowing circular swirling stargate ring in center */}
+        <mesh position={[0, 1.1, 0]}>
+          <torusGeometry args={[0.85, 0.06, 8, 24]} />
+          <meshBasicMaterial color="#b2ebf2" transparent opacity={0.85} />
+        </mesh>
+        {/* Swirling energy core plane */}
+        <mesh position={[0, 1.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.8, 0.8, 0.02, 16]} />
+          <meshBasicMaterial color="#00e5ff" transparent opacity={0.35} />
+        </mesh>
+        {/* Ethereal portal light pillar */}
         <mesh position={[0, 1.5, 0]}>
-          <cylinderGeometry args={[1.2, 1.2, 3, 16, 1, true]} />
-          <meshBasicMaterial color="#80deea" transparent opacity={0.12} side={THREE.DoubleSide} />
+          <cylinderGeometry args={[1.1, 1.1, 3, 16, 1, true]} />
+          <meshBasicMaterial color="#80deea" transparent opacity={0.1} side={THREE.DoubleSide} />
         </mesh>
+
+        {/* Cute Wooden Signpost next to the Portal */}
+        <group position={[-1.6, 0.1, 0.8]} rotation={[0, 0.6, 0]} scale={[0.85, 0.85, 0.85]}>
+          {/* Post */}
+          <mesh position={[0, 0.4, 0]} castShadow>
+            <cylinderGeometry args={[0.04, 0.04, 0.8, 4]} />
+            <meshStandardMaterial color="#8d6e63" roughness={0.9} />
+          </mesh>
+          {/* Board */}
+          <mesh position={[0, 0.75, 0]} castShadow>
+            <boxGeometry args={[0.5, 0.32, 0.08]} />
+            <meshStandardMaterial color="#a1887f" roughness={0.9} />
+          </mesh>
+          {/* Star symbol indicator */}
+          <mesh position={[0, 0.75, 0.045]}>
+            <dodecahedronGeometry args={[0.08, 0]} />
+            <meshStandardMaterial color="#ffe082" emissive="#ffe082" emissiveIntensity={0.6} />
+          </mesh>
+        </group>
       </group>
 
       {/* 5. Singing Tree */}
