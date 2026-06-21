@@ -137,8 +137,48 @@ export function getPlanetHeight(
   const dy = pos.y / len;
   const dz = pos.z / len;
   
-  // Sample noise on the sphere surface
-  const noiseVal = perlin.fbm(dx * 1.5, dy * 1.5, dz * 1.5, 4, 1.8, 0.45);
+  // Deterministic planet type selection matching generatePlanetTheme
+  const index = Math.round((seed / 98765) - 1);
+  const types: ('forest' | 'crystal' | 'desert' | 'mechanic' | 'water')[] = [
+    'forest', 'crystal', 'desert', 'mechanic', 'water'
+  ];
+  let planetType: 'forest' | 'crystal' | 'desert' | 'mechanic' | 'water' = 'forest';
+  
+  if (index >= 0 && index < 5) {
+    planetType = types[index];
+  } else {
+    const randVal = Math.abs(Math.sin(seed * 13.37));
+    const typesFallback: ('forest' | 'desert' | 'mechanic' | 'crystal' | 'water')[] = [
+      'forest', 'desert', 'mechanic', 'crystal', 'water'
+    ];
+    planetType = typesFallback[Math.floor(randVal * typesFallback.length)];
+  }
+
+  let noiseVal = 0;
+  
+  if (planetType === 'mechanic') {
+    // Terraced platforms / plateaus for cybernetic grid
+    noiseVal = perlin.fbm(dx * 1.5, dy * 1.5, dz * 1.5, 4, 1.8, 0.45);
+    noiseVal = Math.round(noiseVal * 4.0) / 4.0;
+  } else if (planetType === 'desert') {
+    // Smooth dune sweeps + small sinus wind ripples
+    noiseVal = perlin.fbm(dx * 1.3, dy * 1.3, dz * 1.3, 3, 2.0, 0.35);
+    const ripple = Math.sin(noiseVal * 28) * 0.04;
+    noiseVal += ripple;
+  } else if (planetType === 'water') {
+    // Submerged terrain (most falls below sea level creating islands)
+    noiseVal = perlin.fbm(dx * 1.5, dy * 1.5, dz * 1.5, 4, 1.8, 0.45);
+    noiseVal -= 0.28;
+  } else if (planetType === 'crystal') {
+    // Jagged, spiky crystal peaks
+    noiseVal = perlin.fbm(dx * 1.6, dy * 1.6, dz * 1.6, 4, 2.0, 0.5);
+    if (noiseVal > 0) {
+      noiseVal = Math.pow(noiseVal, 1.35);
+    }
+  } else {
+    // Standard rolling hills forest
+    noiseVal = perlin.fbm(dx * 1.5, dy * 1.5, dz * 1.5, 4, 1.8, 0.45);
+  }
   
   // Return displaced height
   return radius + noiseVal * maxHeight;

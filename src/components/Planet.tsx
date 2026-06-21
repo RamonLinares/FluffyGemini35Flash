@@ -16,19 +16,16 @@ const Tree: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; co
   color,
   scale,
 }) => {
-  const trunkHeight = 1.6 * scale; // Increased to pierce through ground
+  const trunkHeight = 1.6 * scale;
   const trunkRadius = 0.12 * scale;
-  const buryDepth = 0.4 * scale;   // Depth to extend below surface
+  const buryDepth = 0.4 * scale;
   
   return (
     <group position={position} quaternion={quaternion}>
-      {/* Trunk */}
       <mesh position={[0, (trunkHeight / 2) - buryDepth, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[trunkRadius * 0.7, trunkRadius, trunkHeight, 5]} />
         <meshStandardMaterial color="#bcaaa4" flatShading roughness={0.9} />
       </mesh>
-      
-      {/* Leaves (fluffy pillowy shapes positioned relative to surface) */}
       <mesh position={[0, 1.2 * scale, 0]} castShadow>
         <dodecahedronGeometry args={[0.7 * scale, 1]} />
         <meshStandardMaterial color={color} flatShading roughness={0.8} />
@@ -67,6 +64,230 @@ const Crystal: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion;
   );
 };
 
+// Orbiting Moon Component
+const OrbitingMoon: React.FC<{ distance: number; size: number; color: string; speed: number; tilt: number }> = ({
+  distance,
+  size,
+  color,
+  speed,
+  tilt,
+}) => {
+  const moonRef = useRef<THREE.Group>(null);
+  useFrame((_, delta) => {
+    if (moonRef.current) {
+      moonRef.current.rotation.y += delta * speed;
+    }
+  });
+  return (
+    <group ref={moonRef} rotation={[tilt, 0, tilt * 0.5]}>
+      <mesh position={[distance, 0, 0]} castShadow receiveShadow>
+        <sphereGeometry args={[size, 16, 16]} />
+        <meshStandardMaterial color={color} roughness={0.8} flatShading />
+      </mesh>
+    </group>
+  );
+};
+
+// Palm Tree for Water worlds
+const PalmTree: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number }> = ({
+  position,
+  quaternion,
+  scale,
+}) => {
+  const height = 2.0 * scale;
+  return (
+    <group position={position} quaternion={quaternion}>
+      <mesh position={[0.1 * scale, height * 0.4, 0]} rotation={[0, 0, -0.15]} castShadow>
+        <cylinderGeometry args={[0.08 * scale, 0.12 * scale, height, 5]} />
+        <meshStandardMaterial color="#8d6e63" flatShading roughness={0.9} />
+      </mesh>
+      {Array.from({ length: 6 }).map((_, idx) => {
+        const angle = (idx * Math.PI * 2) / 6;
+        return (
+          <mesh 
+            key={idx}
+            position={[0.2 * scale, height * 0.85, 0]} 
+            rotation={[0.3, angle, 0]} 
+            scale={[1.2 * scale, 0.1 * scale, 0.4 * scale]}
+            castShadow
+          >
+            <boxGeometry args={[0.8, 1, 1]} />
+            <meshStandardMaterial color="#2e7d32" flatShading roughness={0.8} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+};
+
+// Cactus for Desert worlds
+const Cactus: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number }> = ({
+  position,
+  quaternion,
+  scale,
+}) => {
+  const mainHeight = 1.4 * scale;
+  return (
+    <group position={position} quaternion={quaternion}>
+      <mesh position={[0, mainHeight / 2, 0]} castShadow>
+        <cylinderGeometry args={[0.14 * scale, 0.14 * scale, mainHeight, 6]} />
+        <meshStandardMaterial color="#388e3c" flatShading roughness={0.9} />
+      </mesh>
+      <mesh position={[-0.2 * scale, mainHeight * 0.6, 0]} rotation={[0, 0, Math.PI / 2]} scale={[0.8, 1, 0.8]} castShadow>
+        <cylinderGeometry args={[0.1 * scale, 0.1 * scale, 0.3 * scale, 5]} />
+        <meshStandardMaterial color="#388e3c" flatShading roughness={0.9} />
+      </mesh>
+      <mesh position={[-0.3 * scale, mainHeight * 0.75, 0]} scale={[0.8, 1, 0.8]} castShadow>
+        <cylinderGeometry args={[0.1 * scale, 0.1 * scale, 0.4 * scale, 5]} />
+        <meshStandardMaterial color="#388e3c" flatShading roughness={0.9} />
+      </mesh>
+      <mesh position={[0.2 * scale, mainHeight * 0.45, 0]} rotation={[0, 0, -Math.PI / 2]} scale={[0.8, 1, 0.8]} castShadow>
+        <cylinderGeometry args={[0.1 * scale, 0.1 * scale, 0.3 * scale, 5]} />
+        <meshStandardMaterial color="#388e3c" flatShading roughness={0.9} />
+      </mesh>
+      <mesh position={[0.3 * scale, mainHeight * 0.6, 0]} scale={[0.8, 1, 0.8]} castShadow>
+        <cylinderGeometry args={[0.1 * scale, 0.1 * scale, 0.4 * scale, 5]} />
+        <meshStandardMaterial color="#388e3c" flatShading roughness={0.9} />
+      </mesh>
+    </group>
+  );
+};
+
+// Steampunk Gear for Mechanic worlds
+const SteampunkGear: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number; color: string }> = ({
+  position,
+  quaternion,
+  scale,
+  color,
+}) => {
+  const gearRef = useRef<THREE.Mesh>(null);
+  useFrame((_, delta) => {
+    if (gearRef.current) {
+      gearRef.current.rotation.y += delta * 0.8;
+    }
+  });
+  return (
+    <group position={position} quaternion={quaternion}>
+      <mesh ref={gearRef} rotation={[Math.PI / 2, 0, 0]} scale={[scale * 0.8, scale * 0.8, scale * 0.25]} castShadow>
+        <cylinderGeometry args={[0.4, 0.4, 1, 8]} />
+        <meshStandardMaterial color={color} roughness={0.4} metalness={0.8} flatShading />
+      </mesh>
+    </group>
+  );
+};
+
+// Mechanical Antenna for Mechanic worlds
+const MechAntenna: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number; color: string }> = ({
+  position,
+  quaternion,
+  scale,
+  color,
+}) => {
+  return (
+    <group position={position} quaternion={quaternion}>
+      <mesh position={[0, 0.8 * scale, 0]} castShadow>
+        <cylinderGeometry args={[0.03 * scale, 0.05 * scale, 1.6 * scale, 4]} />
+        <meshStandardMaterial color="#78909c" metalness={0.9} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 1.65 * scale, 0]} castShadow>
+        <sphereGeometry args={[0.15 * scale, 8, 8]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.2} roughness={0.1} />
+      </mesh>
+    </group>
+  );
+};
+
+// Crystal Obelisk for Crystal worlds
+const CrystalObelisk: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number; color: string }> = ({
+  position,
+  quaternion,
+  scale,
+  color,
+}) => {
+  return (
+    <mesh position={position} quaternion={quaternion} castShadow>
+      <cylinderGeometry args={[0.02 * scale, 0.25 * scale, 2.2 * scale, 6]} />
+      <meshStandardMaterial 
+        color={color} 
+        emissive={color} 
+        emissiveIntensity={0.5} 
+        roughness={0.05} 
+        metalness={0.9}
+        flatShading
+      />
+    </mesh>
+  );
+};
+
+// Ruined stone pillar for Forest civilizations
+const RuinedPillar: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number }> = ({
+  position,
+  quaternion,
+  scale,
+}) => {
+  const height = 1.8 * scale;
+  return (
+    <group position={position} quaternion={quaternion}>
+      <mesh position={[0, height / 2, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.22 * scale, 0.22 * scale, height, 6]} />
+        <meshStandardMaterial color="#b0bec5" roughness={0.95} flatShading />
+      </mesh>
+      <mesh position={[0, height + 0.08 * scale, 0]} castShadow>
+        <boxGeometry args={[0.5 * scale, 0.16 * scale, 0.5 * scale]} />
+        <meshStandardMaterial color="#b0bec5" roughness={0.95} flatShading />
+      </mesh>
+    </group>
+  );
+};
+
+// Boulders/Rocks for Desert worlds
+const DesertRock: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number }> = ({
+  position,
+  quaternion,
+  scale,
+}) => {
+  return (
+    <mesh position={position} quaternion={quaternion} castShadow receiveShadow>
+      <dodecahedronGeometry args={[0.55 * scale, 1]} />
+      <meshStandardMaterial color="#a1887f" flatShading roughness={0.95} />
+    </mesh>
+  );
+};
+
+// Metal Pipes for Mechanic worlds
+const MetalPipe: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number }> = ({
+  position,
+  quaternion,
+  scale,
+}) => {
+  return (
+    <group position={position} quaternion={quaternion}>
+      <mesh position={[0, 0.6 * scale, 0]} castShadow>
+        <cylinderGeometry args={[0.08 * scale, 0.08 * scale, 1.2 * scale, 5]} />
+        <meshStandardMaterial color="#90a4ae" metalness={0.85} roughness={0.3} />
+      </mesh>
+      <mesh position={[0, 1.15 * scale, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.1 * scale, 0.1 * scale, 0.4 * scale, 5]} />
+        <meshStandardMaterial color="#78909c" metalness={0.85} roughness={0.3} />
+      </mesh>
+    </group>
+  );
+};
+
+// Seaweed for Water worlds
+const Seaweed: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion; scale: number }> = ({
+  position,
+  quaternion,
+  scale,
+}) => {
+  return (
+    <mesh position={position} quaternion={quaternion} castShadow>
+      <cylinderGeometry args={[0.02 * scale, 0.06 * scale, 1.5 * scale, 4]} />
+      <meshStandardMaterial color="#004d40" flatShading roughness={0.8} />
+    </mesh>
+  );
+};
+
 // Floating Sky Island (Rock base + glowing crystal on top, floating in the air)
 const FloatingIsland: React.FC<{ position: THREE.Vector3; scale: number; color: string }> = ({
   position,
@@ -75,12 +296,10 @@ const FloatingIsland: React.FC<{ position: THREE.Vector3; scale: number; color: 
 }) => {
   return (
     <group position={position} scale={[scale, scale, scale]}>
-      {/* Rock base */}
       <mesh castShadow receiveShadow>
         <dodecahedronGeometry args={[0.8, 1]} />
         <meshStandardMaterial color="#90a4ae" flatShading roughness={0.9} />
       </mesh>
-      {/* Little crystal growing on top */}
       <mesh position={[0, 0.7, 0]} rotation={[0.2, 0.4, 0.1]} castShadow>
         <octahedronGeometry args={[0.35, 0]} />
         <meshStandardMaterial 
@@ -252,30 +471,155 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
         
         const scale = rand.range(0.7, 1.3);
         
-        // Seeded roll to select type (Trees vs Crystals)
+        // Seeded roll to select type based on planetType
         const typeRoll = rand.next();
-        if (typeRoll < 0.65) {
-          // Tree
-          const leafColor = theme.propColors[Math.floor(rand.next() * theme.propColors.length)];
-          list.push({
-            id: `tree_${i}`,
-            type: 'tree',
-            position,
-            quaternion,
-            color: leafColor,
-            scale,
-          });
-        } else if (typeRoll < 0.85) {
-          // Crystal
-          const crystalColor = theme.accentColor;
-          list.push({
-            id: `crystal_${i}`,
-            type: 'crystal',
-            position,
-            quaternion,
-            color: crystalColor,
-            scale: scale * 0.8,
-          });
+        const pType = theme.planetType || 'forest';
+        
+        if (pType === 'mechanic') {
+          if (typeRoll < 0.38) {
+            list.push({
+              id: `gear_${i}`,
+              type: 'gear',
+              position,
+              quaternion,
+              color: theme.propColors[Math.floor(rand.next() * theme.propColors.length)],
+              scale: scale * 1.1,
+            });
+          } else if (typeRoll < 0.75) {
+            list.push({
+              id: `antenna_${i}`,
+              type: 'antenna',
+              position,
+              quaternion,
+              color: theme.accentColor,
+              scale: scale * 0.9,
+            });
+          } else if (typeRoll < 0.92) {
+            list.push({
+              id: `pipe_${i}`,
+              type: 'pipe',
+              position,
+              quaternion,
+              color: '#90a4ae',
+              scale: scale * 1.0,
+            });
+          }
+        } else if (pType === 'desert') {
+          if (typeRoll < 0.45) {
+            list.push({
+              id: `cactus_${i}`,
+              type: 'cactus',
+              position,
+              quaternion,
+              color: '#388e3c',
+              scale: scale * 1.0,
+            });
+          } else if (typeRoll < 0.75) {
+            list.push({
+              id: `rock_${i}`,
+              type: 'rock',
+              position,
+              quaternion,
+              color: '#a1887f',
+              scale: scale * 1.2,
+            });
+          } else if (typeRoll < 0.90) {
+            list.push({
+              id: `crystal_${i}`,
+              type: 'crystal',
+              position,
+              quaternion,
+              color: '#ff5722',
+              scale: scale * 0.8,
+            });
+          }
+        } else if (pType === 'water') {
+          if (typeRoll < 0.45) {
+            list.push({
+              id: `palmtree_${i}`,
+              type: 'palmtree',
+              position,
+              quaternion,
+              color: '#2e7d32',
+              scale: scale * 1.0,
+            });
+          } else if (typeRoll < 0.80) {
+            list.push({
+              id: `seaweed_${i}`,
+              type: 'seaweed',
+              position,
+              quaternion,
+              color: '#004d40',
+              scale: scale * 1.1,
+            });
+          } else if (typeRoll < 0.92) {
+            list.push({
+              id: `crystal_${i}`,
+              type: 'crystal',
+              position,
+              quaternion,
+              color: '#4db6ac',
+              scale: scale * 0.7,
+            });
+          }
+        } else if (pType === 'crystal') {
+          if (typeRoll < 0.45) {
+            list.push({
+              id: `obelisk_${i}`,
+              type: 'obelisk',
+              position,
+              quaternion,
+              color: theme.accentColor,
+              scale: scale * 1.0,
+            });
+          } else if (typeRoll < 0.80) {
+            list.push({
+              id: `crystal_${i}`,
+              type: 'crystal',
+              position,
+              quaternion,
+              color: theme.propColors[Math.floor(rand.next() * theme.propColors.length)],
+              scale: scale * 0.85,
+            });
+          } else if (typeRoll < 0.92 && theme.civilization === 'crystal_spires') {
+            list.push({
+              id: `pillar_${i}`,
+              type: 'pillar',
+              position,
+              quaternion,
+              color: '#cfd8dc',
+              scale: scale * 0.9,
+            });
+          }
+        } else {
+          if (typeRoll < 0.65) {
+            list.push({
+              id: `tree_${i}`,
+              type: 'tree',
+              position,
+              quaternion,
+              color: theme.propColors[Math.floor(rand.next() * theme.propColors.length)],
+              scale: scale * 1.0,
+            });
+          } else if (typeRoll < 0.82) {
+            list.push({
+              id: `crystal_${i}`,
+              type: 'crystal',
+              position,
+              quaternion,
+              color: theme.accentColor,
+              scale: scale * 0.8,
+            });
+          } else if (typeRoll < 0.92 && theme.civilization === 'ruins') {
+            list.push({
+              id: `pillar_${i}`,
+              type: 'pillar',
+              position,
+              quaternion,
+              color: '#b0bec5',
+              scale: scale * 0.95,
+            });
+          }
         }
       }
     }
@@ -315,40 +659,82 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
         />
       </mesh>
 
-      {/* Water Sphere (Translucent Blue) */}
+      {/* Water / Lava Sphere */}
       <mesh castShadow receiveShadow>
         <sphereGeometry args={[baseRadius, 32, 32]} />
         <meshStandardMaterial 
-          color={theme.waterColor} 
+          color={theme.planetType === 'desert' ? '#ff3d00' : theme.waterColor} 
+          emissive={theme.planetType === 'desert' ? '#ff1a00' : '#000000'}
+          emissiveIntensity={theme.planetType === 'desert' ? 0.65 : 0.0}
           transparent 
-          opacity={0.65} 
-          roughness={0.1}
+          opacity={theme.planetType === 'desert' ? 0.85 : 0.65} 
+          roughness={theme.planetType === 'desert' ? 0.8 : 0.1}
           metalness={0.1}
         />
       </mesh>
 
-      {/* Render Scattered Trees and Crystals */}
+      {/* Orbital Rings (Tilted) */}
+      {theme.hasRings && (
+        <mesh rotation={[Math.PI / 3.5, 0, Math.PI / 6]} castShadow receiveShadow>
+          <ringGeometry args={[baseRadius * 1.45, baseRadius * 2.1, 64]} />
+          <meshStandardMaterial 
+            color={theme.ringColor || '#ffffff'} 
+            transparent 
+            opacity={0.55} 
+            side={THREE.DoubleSide} 
+            roughness={0.4}
+            metalness={0.1}
+          />
+        </mesh>
+      )}
+
+      {/* Orbiting Moons */}
+      {theme.moonsCount > 0 && Array.from({ length: theme.moonsCount }).map((_, idx) => {
+        const distance = baseRadius * 1.7 + idx * 4.5;
+        const size = 0.8 + (idx * 0.5) + (Math.sin(idx * 99) * 0.2);
+        const color = theme.moonColors[idx] || theme.accentColor;
+        const speed = 0.08 + (0.05 / (idx + 1)) * (idx % 2 === 0 ? 1 : -1);
+        const tilt = 0.2 + idx * 0.25;
+        
+        return (
+          <OrbitingMoon
+            key={idx}
+            distance={distance}
+            size={size}
+            color={color}
+            speed={speed}
+            tilt={tilt}
+          />
+        );
+      })}
+
+      {/* Render Scattered Props based on type */}
       {propsList.map((p) => {
-        if (p.type === 'tree') {
-          return (
-            <Tree 
-              key={p.id} 
-              position={p.position} 
-              quaternion={p.quaternion} 
-              color={p.color} 
-              scale={p.scale} 
-            />
-          );
-        } else {
-          return (
-            <Crystal 
-              key={p.id} 
-              position={p.position} 
-              quaternion={p.quaternion} 
-              color={p.color} 
-              scale={p.scale} 
-            />
-          );
+        switch (p.type) {
+          case 'tree':
+            return <Tree key={p.id} position={p.position} quaternion={p.quaternion} color={p.color} scale={p.scale} />;
+          case 'crystal':
+            return <Crystal key={p.id} position={p.position} quaternion={p.quaternion} color={p.color} scale={p.scale} />;
+          case 'palmtree':
+            return <PalmTree key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} />;
+          case 'cactus':
+            return <Cactus key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} />;
+          case 'gear':
+            return <SteampunkGear key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} color={p.color} />;
+          case 'antenna':
+            return <MechAntenna key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} color={p.color} />;
+          case 'obelisk':
+            return <CrystalObelisk key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} color={p.color} />;
+          case 'pillar':
+            return <RuinedPillar key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} />;
+          case 'rock':
+            return <DesertRock key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} />;
+          case 'pipe':
+            return <MetalPipe key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} />;
+          case 'seaweed':
+            return <Seaweed key={p.id} position={p.position} quaternion={p.quaternion} scale={p.scale} />;
+          default:
+            return null;
         }
       })}
 

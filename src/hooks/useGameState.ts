@@ -17,7 +17,7 @@ const ACCESSORIES = ['none', 'flower', 'crown', 'headphones', 'ribbon'];
 
 // Generates a deterministic planet theme based on index
 function generatePlanetTheme(index: number): PlanetTheme {
-  const seeds = [
+  const seeds: PlanetTheme[] = [
     // Predefined beautiful palettes for the first 5 planets
     {
       name: 'Chroma Clover',
@@ -28,6 +28,13 @@ function generatePlanetTheme(index: number): PlanetTheme {
       skyColor: '#e8f5e9',
       accentColor: '#81c784', // Emerald green
       propColors: ['#a5d6a7', '#81c784', '#fff59d'],
+      planetType: 'forest',
+      hasRings: false,
+      ringColor: '#ffffff',
+      moonsCount: 0,
+      moonColors: [],
+      doubleStars: false,
+      civilization: 'ruins',
     },
     {
       name: 'Dreamy Lilac',
@@ -38,6 +45,13 @@ function generatePlanetTheme(index: number): PlanetTheme {
       skyColor: '#ede7f6',
       accentColor: '#ba68c8', // Deep lavender
       propColors: ['#ce93d8', '#b39ddb', '#ff8a80'],
+      planetType: 'crystal',
+      hasRings: false,
+      ringColor: '#ffffff',
+      moonsCount: 2,
+      moonColors: ['#fcddec', '#c7ceea'],
+      doubleStars: false,
+      civilization: 'crystal_spires',
     },
     {
       name: 'Peach Horizon',
@@ -48,6 +62,13 @@ function generatePlanetTheme(index: number): PlanetTheme {
       skyColor: '#fffde7',
       accentColor: '#ffb74d', // Pastel orange
       propColors: ['#ffcc80', '#ffe082', '#ffab91'],
+      planetType: 'desert',
+      hasRings: true,
+      ringColor: '#ffe0b2',
+      moonsCount: 0,
+      moonColors: [],
+      doubleStars: false,
+      civilization: 'none',
     },
     {
       name: 'Mint Starlight',
@@ -58,6 +79,13 @@ function generatePlanetTheme(index: number): PlanetTheme {
       skyColor: '#e0f7fa',
       accentColor: '#4db6ac', // Mint accent
       propColors: ['#80cbc4', '#90caf9', '#ffe082'],
+      planetType: 'mechanic',
+      hasRings: false,
+      ringColor: '#ffffff',
+      moonsCount: 0,
+      moonColors: [],
+      doubleStars: true,
+      civilization: 'steampunk',
     },
     {
       name: 'Luminous Nebula',
@@ -68,6 +96,13 @@ function generatePlanetTheme(index: number): PlanetTheme {
       skyColor: '#fdf2f8',
       accentColor: '#f06292', // Warm pink
       propColors: ['#f48fb1', '#ce93d8', '#90caf9'],
+      planetType: 'water',
+      hasRings: true,
+      ringColor: '#f8bbd0',
+      moonsCount: 1,
+      moonColors: ['#c7ceea'],
+      doubleStars: true,
+      civilization: 'futuristic',
     },
   ];
 
@@ -90,6 +125,26 @@ function generatePlanetTheme(index: number): PlanetTheme {
     `hsl(${(hue - 30 + 360) % 360}, 45%, 88%)`,
   ];
 
+  const types: ('forest' | 'desert' | 'mechanic' | 'crystal' | 'water')[] = [
+    'forest', 'desert', 'mechanic', 'crystal', 'water'
+  ];
+  const planetType = types[Math.floor(rand.next() * types.length)];
+  const hasRings = rand.next() < 0.5;
+  const ringColor = `hsl(${(hue + 60) % 360}, 65%, 80%)`;
+  
+  const moonsCount = Math.floor(rand.next() * 4); // 0 to 3 moons
+  const moonColors: string[] = [];
+  for (let i = 0; i < moonsCount; i++) {
+    moonColors.push(`hsl(${(hue + 120 + i * 40) % 360}, 50%, 85%)`);
+  }
+  
+  const doubleStars = rand.next() < 0.4;
+  
+  const civStyles: ('none' | 'ruins' | 'crystal_spires' | 'steampunk' | 'futuristic')[] = [
+    'none', 'ruins', 'crystal_spires', 'steampunk', 'futuristic'
+  ];
+  const civilization = civStyles[Math.floor(rand.next() * civStyles.length)];
+
   return {
     name: `Stardust ${index + 1}`,
     landColor,
@@ -99,6 +154,13 @@ function generatePlanetTheme(index: number): PlanetTheme {
     skyColor,
     accentColor,
     propColors,
+    planetType,
+    hasRings,
+    ringColor,
+    moonsCount,
+    moonColors,
+    doubleStars,
+    civilization,
   };
 }
 

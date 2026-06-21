@@ -11,6 +11,9 @@ export interface Quest {
   icon: string; // Font Awesome icon name e.g., 'star', 'rss', 'child', 'mountain', 'music'
 }
 
+export type PlanetType = 'forest' | 'desert' | 'mechanic' | 'crystal' | 'water';
+export type CivilizationStyle = 'none' | 'ruins' | 'crystal_spires' | 'steampunk' | 'futuristic';
+
 export interface PlanetTheme {
   name: string;
   landColor: string;
@@ -20,6 +23,13 @@ export interface PlanetTheme {
   skyColor: string;
   accentColor: string;
   propColors: string[];
+  planetType: PlanetType;
+  hasRings: boolean;
+  ringColor: string;
+  moonsCount: number;
+  moonColors: string[];
+  doubleStars: boolean;
+  civilization: CivilizationStyle;
 }
 
 export interface PlanetConfig {

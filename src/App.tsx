@@ -133,15 +133,37 @@ export const App: React.FC = () => {
         {/* Soft atmospheric fog */}
         <fog attach="fog" args={[planetConfig.theme.fogColor, 15, 60]} />
 
+        {/* Sky Suns (Binary Star System or Single Star) */}
+        {!planetConfig.theme.doubleStars ? (
+          <mesh position={[60, 100, 50]}>
+            <sphereGeometry args={[7, 16, 16]} />
+            <meshBasicMaterial color="#fffbeb" />
+          </mesh>
+        ) : (
+          <>
+            {/* Primary warm golden star */}
+            <mesh position={[60, 100, 50]}>
+              <sphereGeometry args={[6.5, 16, 16]} />
+              <meshBasicMaterial color="#ffe082" />
+            </mesh>
+            {/* Secondary cool cyan star */}
+            <mesh position={[-70, 70, -60]}>
+              <sphereGeometry args={[4.5, 16, 16]} />
+              <meshBasicMaterial color="#80deea" />
+            </mesh>
+          </>
+        )}
+
         {/* Ethereal Lighting Systems */}
         <ambientLight 
-          intensity={1.1} 
+          intensity={1.0} 
           color={planetConfig.theme.skyColor} 
         />
         
+        {/* Primary Sun Light */}
         <directionalLight
           position={[12, 28, 12]}
-          intensity={1.4}
+          intensity={1.2}
           color="#ffffff"
           castShadow
           shadow-mapSize-width={1024}
@@ -154,10 +176,19 @@ export const App: React.FC = () => {
           shadow-bias={-0.0006}
         />
         
+        {/* Secondary Sun Light (Active only in doubleStars systems) */}
+        {planetConfig.theme.doubleStars && (
+          <directionalLight
+            position={[-28, 20, -24]}
+            intensity={0.7}
+            color="#80deea" // Cyan tint bounce
+          />
+        )}
+        
         {/* Soft bounce light from the bottom sphere */}
         <directionalLight 
           position={[-10, -25, -10]} 
-          intensity={0.6} 
+          intensity={0.5} 
           color={planetConfig.theme.accentColor} 
         />
 
