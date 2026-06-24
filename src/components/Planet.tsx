@@ -2,7 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { PlanetTheme } from '../types';
-import { getPlanetHeight, SeededRandom } from '../utils/noise';
+import { getPlanetHeight, SeededRandom, getPerlinGenerator } from '../utils/noise';
 
 interface PlanetProps {
   seed: number;
@@ -421,19 +421,29 @@ const Clouds: React.FC<{ radius: number; seed: number; color: string }> = ({ rad
 
 export const Planet: React.FC<PlanetProps> = ({ seed, theme, maxHeight }) => {
   const baseRadius = 22;
-  const waterRef = useRef<THREE.Mesh>(null);
+  const waterRef1 = useRef<THREE.Mesh>(null);
+  const waterRef2 = useRef<THREE.Mesh>(null);
 
-  useFrame((state) => {
-    if (waterRef.current) {
-      const time = state.clock.getElapsedTime();
-      const tide = 1.0 + Math.sin(time * 1.2) * 0.005;
-      waterRef.current.scale.set(tide, tide, tide);
+  useFrame((state, delta) => {
+    const time = state.clock.getElapsedTime();
+    const tide = 1.0 + Math.sin(time * 1.2) * 0.004;
+
+    if (waterRef1.current) {
+      waterRef1.current.rotation.y += delta * 0.06;
+      waterRef1.current.rotation.x += delta * 0.03;
+      waterRef1.current.scale.set(tide, tide, tide);
+    }
+    if (waterRef2.current) {
+      waterRef2.current.rotation.y -= delta * 0.045;
+      waterRef2.current.rotation.z += delta * 0.025;
+      const innerTide = tide * 0.995;
+      waterRef2.current.scale.set(innerTide, innerTide, innerTide);
     }
   });
 
   // 1. Procedural Terrain Geometry Generation
   const terrainGeometry = useMemo(() => {
-    const geom = new THREE.IcosahedronGeometry(baseRadius, 5); // 5 levels of subdivision
+    const geom = new THREE.IcosahedronGeometry(baseRadius, 6); // 6 levels of subdivision
     const posAttr = geom.getAttribute('position');
     const count = posAttr.count;
 
@@ -487,6 +497,34 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme, maxHeight }) => {
     geom.computeVertexNormals();
     return geom;
   }, [seed, theme]);
+
+  // 1.5. Procedural Water/Lava Geometry Generation (Low-poly waves)
+  const waterGeometry = useMemo(() => {
+    const geom = new THREE.IcosahedronGeometry(theme.waterRadius, 4); // 4 levels of detail is plenty for water (2562 vertices)
+    const posAttr = geom.getAttribute('position');
+    const count = posAttr.count;
+    const positions = new Float32Array(count * 3);
+    const tempPos = new THREE.Vector3();
+    const perlin = getPerlinGenerator(seed + 888); // Different seed for water noise
+
+    for (let i = 0; i < count; i++) {
+      tempPos.fromBufferAttribute(posAttr, i);
+      const dir = tempPos.clone().normalize();
+      
+      // Calculate a gentle wave noise displacement
+      const waveNoise = perlin.fbm(dir.x * 2.0, dir.y * 2.0, dir.z * 2.0, 3, 2.0, 0.5);
+      const height = theme.waterRadius + waveNoise * 0.18;
+      tempPos.copy(dir).multiplyScalar(height);
+      
+      positions[i * 3] = tempPos.x;
+      positions[i * 3 + 1] = tempPos.y;
+      positions[i * 3 + 2] = tempPos.z;
+    }
+
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geom.computeVertexNormals();
+    return geom;
+  }, [seed, theme.waterRadius]);
 
   // 2. Procedural Props Scattering (Seeded Random)
   const propsList = useMemo(() => {
@@ -720,17 +758,31 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme, maxHeight }) => {
         </mesh>
       )}
 
-      {/* Water / Lava Sphere */}
-      <mesh ref={waterRef} castShadow receiveShadow>
-        <sphereGeometry args={[theme.waterRadius, 32, 32]} />
+      {/* Water / Lava Sphere Layer 1 */}
+      <mesh ref={waterRef1} geometry={waterGeometry} castShadow receiveShadow>
         <meshStandardMaterial 
           color={theme.planetType === 'desert' ? '#ff3d00' : theme.waterColor} 
-          emissive={theme.planetType === 'desert' ? '#ff1a00' : '#000000'}
-          emissiveIntensity={theme.planetType === 'desert' ? 0.65 : 0.0}
+          emissive={theme.planetType === 'desert' ? '#ff1a00' : theme.waterColor}
+          emissiveIntensity={theme.planetType === 'desert' ? 0.65 : 0.15}
           transparent 
-          opacity={theme.planetType === 'desert' ? 0.85 : 0.65} 
-          roughness={theme.planetType === 'desert' ? 0.8 : 0.1}
-          metalness={0.1}
+          opacity={theme.planetType === 'desert' ? 0.75 : 0.55} 
+          roughness={theme.planetType === 'desert' ? 0.8 : 0.15}
+          metalness={theme.planetType === 'desert' ? 0.1 : 0.8} // shiny water reflections
+          flatShading
+        />
+      </mesh>
+
+      {/* Water / Lava Sphere Layer 2 (Inner rotating layer for moiré waves) */}
+      <mesh ref={waterRef2} geometry={waterGeometry} receiveShadow>
+        <meshStandardMaterial 
+          color={theme.planetType === 'desert' ? '#e65100' : theme.accentColor} // Use accent color for rich color blending
+          emissive={theme.planetType === 'desert' ? '#ff3d00' : theme.accentColor}
+          emissiveIntensity={theme.planetType === 'desert' ? 0.4 : 0.1}
+          transparent 
+          opacity={theme.planetType === 'desert' ? 0.6 : 0.4} 
+          roughness={theme.planetType === 'desert' ? 0.9 : 0.25}
+          metalness={theme.planetType === 'desert' ? 0.1 : 0.6}
+          flatShading
         />
       </mesh>
 
