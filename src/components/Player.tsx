@@ -439,7 +439,7 @@ export const Player: React.FC<PlayerProps> = ({
 
   // Sound synthesis utility for cute feedback chimes
   const playBloopSound = (freq: number, duration: number) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || (window as any).audioMuted) return;
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
     

@@ -96,6 +96,7 @@ export const HUD: React.FC<HUDProps> = ({
 
   const toggleAudioMuted = (e: React.MouseEvent) => {
     e.stopPropagation();
+    (e.currentTarget as HTMLButtonElement).blur();
     const nextVal = !audioMuted;
     setAudioMuted(nextVal);
     if (typeof window !== 'undefined') {
@@ -106,6 +107,7 @@ export const HUD: React.FC<HUDProps> = ({
 
   const toggleGamePaused = (e: React.MouseEvent) => {
     e.stopPropagation();
+    (e.currentTarget as HTMLButtonElement).blur();
     const nextVal = !gamePaused;
     setGamePaused(nextVal);
     if (typeof window !== 'undefined') {
@@ -116,6 +118,7 @@ export const HUD: React.FC<HUDProps> = ({
   const handleMobileJump = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     if (e.cancelable) e.preventDefault();
+    (e.currentTarget as HTMLButtonElement).blur();
     if (typeof window !== 'undefined' && (window as any).gameInput) {
       (window as any).gameInput.keys.space = true;
       setTimeout(() => {
@@ -192,7 +195,7 @@ export const HUD: React.FC<HUDProps> = ({
         <div className="top-right-buttons-container">
           <button 
             className="code-sync-btn interactive"
-            onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
+            onClick={(e) => { e.stopPropagation(); e.currentTarget.blur(); setShowSettings(true); }}
             title="Stardust Customize & Save Sync Code"
           >
             <span>⭐ CODE</span>
