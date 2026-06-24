@@ -10,6 +10,7 @@ interface QuestManagerProps {
   playerPositionRef: React.MutableRefObject<THREE.Vector3>;
   onQuestUpdate: (questType: string, amount: number) => void;
   waterRadius: number;
+  maxHeight: number;
 }
 
 // Synth Sound Player Helper
@@ -85,9 +86,9 @@ export const QuestManager: React.FC<QuestManagerProps> = ({
   playerPositionRef,
   onQuestUpdate,
   waterRadius,
+  maxHeight,
 }) => {
   const baseRadius = 22;
-  const maxHeight = 4;
 
   // Active state for quest object collections (reset when seed/planet changes)
   const [collectedFlowers, setCollectedFlowers] = useState<{ [id: string]: boolean }>({});

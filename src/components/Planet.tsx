@@ -7,6 +7,7 @@ import { getPlanetHeight, SeededRandom } from '../utils/noise';
 interface PlanetProps {
   seed: number;
   theme: PlanetTheme;
+  maxHeight: number;
 }
 
 // Low-poly Anime Tree
@@ -65,25 +66,65 @@ const Crystal: React.FC<{ position: THREE.Vector3; quaternion: THREE.Quaternion;
 };
 
 // Orbiting Moon Component
-const OrbitingMoon: React.FC<{ distance: number; size: number; color: string; speed: number; tilt: number }> = ({
+const OrbitingMoon: React.FC<{
+  distance: number;
+  size: number;
+  color: string;
+  speed: number;
+  tilt: number;
+  planetType: 'forest' | 'crystal' | 'desert' | 'mechanic' | 'water';
+}> = ({
   distance,
   size,
   color,
   speed,
   tilt,
+  planetType,
 }) => {
   const moonRef = useRef<THREE.Group>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  
   useFrame((_, delta) => {
     if (moonRef.current) {
       moonRef.current.rotation.y += delta * speed;
     }
+    if (meshRef.current) {
+      meshRef.current.rotation.y += delta * 0.5;
+      meshRef.current.rotation.x += delta * 0.2;
+    }
   });
+  
   return (
     <group ref={moonRef} rotation={[tilt, 0, tilt * 0.5]}>
-      <mesh position={[distance, 0, 0]} castShadow receiveShadow>
-        <sphereGeometry args={[size, 16, 16]} />
-        <meshStandardMaterial color={color} roughness={0.8} flatShading />
-      </mesh>
+      <group position={[distance, 0, 0]}>
+        <mesh ref={meshRef} castShadow receiveShadow>
+          {planetType === 'crystal' ? (
+            <octahedronGeometry args={[size, 0]} />
+          ) : (
+            <sphereGeometry args={[size, 12, 12]} />
+          )}
+          <meshStandardMaterial 
+            color={color} 
+            roughness={planetType === 'crystal' ? 0.15 : 0.8} 
+            metalness={planetType === 'crystal' ? 0.9 : 0.1}
+            flatShading 
+          />
+        </mesh>
+        
+        {planetType === 'mechanic' && (
+          <mesh rotation={[Math.PI / 3.5, 0.2, 0.1]} receiveShadow>
+            <ringGeometry args={[size * 1.35, size * 1.9, 16]} />
+            <meshStandardMaterial 
+              color={color} 
+              side={THREE.DoubleSide} 
+              transparent 
+              opacity={0.8} 
+              roughness={0.4}
+              metalness={0.8}
+            />
+          </mesh>
+        )}
+      </group>
     </group>
   );
 };
@@ -378,9 +419,17 @@ const Clouds: React.FC<{ radius: number; seed: number; color: string }> = ({ rad
   );
 };
 
-export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
+export const Planet: React.FC<PlanetProps> = ({ seed, theme, maxHeight }) => {
   const baseRadius = 22;
-  const maxHeight = 4;
+  const waterRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (waterRef.current) {
+      const time = state.clock.getElapsedTime();
+      const tide = 1.0 + Math.sin(time * 1.2) * 0.005;
+      waterRef.current.scale.set(tide, tide, tide);
+    }
+  });
 
   // 1. Procedural Terrain Geometry Generation
   const terrainGeometry = useMemo(() => {
@@ -653,14 +702,26 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
       <mesh geometry={terrainGeometry} castShadow receiveShadow>
         <meshStandardMaterial 
           vertexColors 
-          roughness={0.8} 
-          metalness={0.1} 
+          roughness={theme.roughness ?? 0.8} 
+          metalness={theme.metalness ?? 0.1} 
           flatShading
         />
       </mesh>
 
+      {/* Cybernetic Wireframe Grid (Mechanic planets only) */}
+      {theme.planetType === 'mechanic' && (
+        <mesh geometry={terrainGeometry} scale={[1.002, 1.002, 1.002]}>
+          <meshBasicMaterial 
+            color={theme.accentColor} 
+            wireframe 
+            transparent 
+            opacity={0.4} 
+          />
+        </mesh>
+      )}
+
       {/* Water / Lava Sphere */}
-      <mesh castShadow receiveShadow>
+      <mesh ref={waterRef} castShadow receiveShadow>
         <sphereGeometry args={[theme.waterRadius, 32, 32]} />
         <meshStandardMaterial 
           color={theme.planetType === 'desert' ? '#ff3d00' : theme.waterColor} 
@@ -704,6 +765,7 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
             color={color}
             speed={speed}
             tilt={tilt}
+            planetType={theme.planetType}
           />
         );
       })}

@@ -204,6 +204,7 @@ export const App: React.FC = () => {
           key={`planet_${planetConfig.seed}`}
           seed={planetConfig.seed} 
           theme={planetConfig.theme} 
+          maxHeight={planetConfig.theme.maxHeight}
         />
 
         {/* Fluffy Player Character (Ball) */}
@@ -215,6 +216,7 @@ export const App: React.FC = () => {
           accessory={accessory}
           playerPositionRef={playerPositionRef}
           onQuestUpdate={updateQuestProgress}
+          maxHeight={planetConfig.theme.maxHeight}
         />
 
         {/* Quest Manager to handle active objectives and interactions */}
@@ -225,6 +227,7 @@ export const App: React.FC = () => {
           playerPositionRef={playerPositionRef}
           onQuestUpdate={updateQuestProgress}
           waterRadius={planetConfig.theme.waterRadius}
+          maxHeight={planetConfig.theme.maxHeight}
         />
 
         {/* Orbit Camera follow locked to planetary coordinates */}

@@ -19,6 +19,7 @@ interface PlayerProps {
   accessory: string;
   playerPositionRef: React.MutableRefObject<THREE.Vector3>;
   onQuestUpdate: (questType: string, amount: number) => void;
+  maxHeight: number;
 }
 
 const getIrisColor = (bodyColor: string) => {
@@ -158,6 +159,7 @@ export const Player: React.FC<PlayerProps> = ({
   accessory,
   playerPositionRef,
   onQuestUpdate,
+  maxHeight,
 }) => {
   const containerRef = useRef<THREE.Group>(null);
   const visualGroupRef = useRef<THREE.Group>(null);
@@ -171,7 +173,6 @@ export const Player: React.FC<PlayerProps> = ({
 
   const radius = 0.75;
   const baseRadius = 22;
-  const maxHeight = 4;
   
   // Set up Keyboard Listeners
   useEffect(() => {

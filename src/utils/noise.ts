@@ -123,6 +123,21 @@ export function getPerlinGenerator(seed: number): Perlin3D {
   return perlinCache.get(seed)!;
 }
 
+function craterEffect(dist: number, R: number): number {
+  if (dist >= R) return 0;
+  const x = dist / R;
+  if (x < 0.8) {
+    const t = x / 0.8;
+    const depth = 0.5; // crater depth in noise units
+    const rim = 0.15;  // rim height in noise units
+    return -depth * (1 - t * t) + rim * t * t;
+  } else {
+    const t = (x - 0.8) / 0.2;
+    const rim = 0.15;
+    return rim * (1 - t) * (1 - t);
+  }
+}
+
 export function getPlanetHeight(
   pos: { x: number; y: number; z: number },
   seed: number,
@@ -165,6 +180,34 @@ export function getPlanetHeight(
     noiseVal = perlin.fbm(dx * 1.3, dy * 1.3, dz * 1.3, 3, 2.0, 0.35);
     const ripple = Math.sin(noiseVal * 28) * 0.04;
     noiseVal += ripple;
+
+    // Deterministic crater centers
+    const c1x = Math.sin(seed * 0.17);
+    const c1y = Math.cos(seed * 0.23);
+    const c1z = Math.sin(seed * 0.31);
+    const c1len = Math.sqrt(c1x * c1x + c1y * c1y + c1z * c1z) || 1;
+    const cx1 = c1x / c1len; const cy1 = c1y / c1len; const cz1 = c1z / c1len;
+
+    const c2x = Math.sin(seed * 0.43);
+    const c2y = Math.cos(seed * 0.51);
+    const c2z = Math.sin(seed * 0.67);
+    const c2len = Math.sqrt(c2x * c2x + c2y * c2y + c2z * c2z) || 1;
+    const cx2 = c2x / c2len; const cy2 = c2y / c2len; const cz2 = c2z / c2len;
+
+    const c3x = Math.sin(seed * 0.79);
+    const c3y = Math.cos(seed * 0.83);
+    const c3z = Math.sin(seed * 0.97);
+    const c3len = Math.sqrt(c3x * c3x + c3y * c3y + c3z * c3z) || 1;
+    const cx3 = c3x / c3len; const cy3 = c3y / c3len; const cz3 = c3z / c3len;
+
+    // Euclidean distance to crater centers on unit sphere
+    const d1 = Math.sqrt((dx - cx1) ** 2 + (dy - cy1) ** 2 + (dz - cz1) ** 2);
+    const d2 = Math.sqrt((dx - cx2) ** 2 + (dy - cy2) ** 2 + (dz - cz2) ** 2);
+    const d3 = Math.sqrt((dx - cx3) ** 2 + (dy - cy3) ** 2 + (dz - cz3) ** 2);
+
+    noiseVal += craterEffect(d1, 0.35);
+    noiseVal += craterEffect(d2, 0.25);
+    noiseVal += craterEffect(d3, 0.30);
   } else if (planetType === 'water') {
     // Submerged terrain (most falls below sea level creating islands)
     noiseVal = perlin.fbm(dx * 1.5, dy * 1.5, dz * 1.5, 4, 1.8, 0.45);

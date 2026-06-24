@@ -36,6 +36,9 @@ function generatePlanetTheme(index: number): PlanetTheme {
       doubleStars: false,
       civilization: 'ruins',
       waterRadius: 21.2,
+      maxHeight: 3.5,
+      roughness: 0.85,
+      metalness: 0.05,
     },
     {
       name: 'Dreamy Lilac',
@@ -54,6 +57,9 @@ function generatePlanetTheme(index: number): PlanetTheme {
       doubleStars: false,
       civilization: 'crystal_spires',
       waterRadius: 21.0,
+      maxHeight: 7.5,
+      roughness: 0.15,
+      metalness: 0.95,
     },
     {
       name: 'Peach Horizon',
@@ -72,6 +78,9 @@ function generatePlanetTheme(index: number): PlanetTheme {
       doubleStars: false,
       civilization: 'none',
       waterRadius: 20.6,
+      maxHeight: 4.5,
+      roughness: 0.95,
+      metalness: 0.0,
     },
     {
       name: 'Mint Starlight',
@@ -90,6 +99,9 @@ function generatePlanetTheme(index: number): PlanetTheme {
       doubleStars: true,
       civilization: 'steampunk',
       waterRadius: 21.2,
+      maxHeight: 5.5,
+      roughness: 0.35,
+      metalness: 0.85,
     },
     {
       name: 'Luminous Nebula',
@@ -108,6 +120,9 @@ function generatePlanetTheme(index: number): PlanetTheme {
       doubleStars: true,
       civilization: 'futuristic',
       waterRadius: 22.4,
+      maxHeight: 5.0,
+      roughness: 0.75,
+      metalness: 0.1,
     },
   ];
 
@@ -150,6 +165,11 @@ function generatePlanetTheme(index: number): PlanetTheme {
   ];
   const civilization = civStyles[Math.floor(rand.next() * civStyles.length)];
   const waterRadius = 20.8 + rand.next() * 1.6; // Varies between 20.8 and 22.4
+  
+  // Custom height/material parameters for infinite planets
+  const maxHeight = 3.0 + rand.next() * 4.5; // 3.0 to 7.5
+  const roughness = 0.1 + rand.next() * 0.85; // 0.1 to 0.95
+  const metalness = rand.next() < 0.5 ? rand.next() * 0.4 : 0.6 + rand.next() * 0.35; // Either low or metallic
 
   return {
     name: `Stardust ${index + 1}`,
@@ -168,6 +188,9 @@ function generatePlanetTheme(index: number): PlanetTheme {
     doubleStars,
     civilization,
     waterRadius,
+    maxHeight,
+    roughness,
+    metalness,
   };
 }
 

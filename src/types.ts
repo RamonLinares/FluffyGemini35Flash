@@ -31,6 +31,9 @@ export interface PlanetTheme {
   doubleStars: boolean;
   civilization: CivilizationStyle;
   waterRadius: number;
+  maxHeight: number;
+  roughness: number;
+  metalness: number;
 }
 
 export interface PlanetConfig {
