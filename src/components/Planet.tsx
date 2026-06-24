@@ -443,7 +443,7 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme, maxHeight }) => {
 
   // 1. Procedural Terrain Geometry Generation
   const terrainGeometry = useMemo(() => {
-    const geom = new THREE.IcosahedronGeometry(baseRadius, 6); // 6 levels of subdivision
+    const geom = new THREE.IcosahedronGeometry(baseRadius, 7); // 7 levels of subdivision
     const posAttr = geom.getAttribute('position');
     const count = posAttr.count;
 
