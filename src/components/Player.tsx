@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getPlanetHeight } from '../utils/noise';
+import type { PlanetTheme } from '../types';
 
 // Initialize global inputs to avoid undefined errors on desktop
 if (typeof window !== 'undefined' && !window.gameInput) {
@@ -13,6 +14,7 @@ if (typeof window !== 'undefined' && !window.gameInput) {
 
 interface PlayerProps {
   seed: number;
+  theme: PlanetTheme;
   color: string;
   accessory: string;
   playerPositionRef: React.MutableRefObject<THREE.Vector3>;
@@ -151,6 +153,7 @@ const RibbonAccessory: React.FC = () => (
 
 export const Player: React.FC<PlayerProps> = ({
   seed,
+  theme,
   color,
   accessory,
   playerPositionRef,
@@ -324,7 +327,7 @@ export const Player: React.FC<PlayerProps> = ({
       }
 
       // Add movement acceleration
-      const runSpeed = 22;
+      const runSpeed = 30;
       vel.current.addScaledVector(inputVector, runSpeed * dt);
     }
 
@@ -353,8 +356,8 @@ export const Player: React.FC<PlayerProps> = ({
     pos.current.addScaledVector(vel.current, dt);
 
     const rawTerrainHeight = getPlanetHeight(pos.current, seed, baseRadius, maxHeight);
-    // Clamp terrain height so player floats on the water surface (radius = 22) instead of sinking below it
-    const terrainHeight = Math.max(baseRadius, rawTerrainHeight);
+    // Clamp terrain height so player floats on the water surface (radius = theme.waterRadius) instead of sinking below it
+    const terrainHeight = Math.max(theme.waterRadius, rawTerrainHeight);
     const minDistance = terrainHeight + radius;
     const currentDistance = pos.current.length();
 

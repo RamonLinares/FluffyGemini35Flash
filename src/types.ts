@@ -30,6 +30,7 @@ export interface PlanetTheme {
   moonColors: string[];
   doubleStars: boolean;
   civilization: CivilizationStyle;
+  waterRadius: number;
 }
 
 export interface PlanetConfig {

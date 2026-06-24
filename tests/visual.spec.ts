@@ -105,4 +105,25 @@ test.describe('Fluffy Explorer Visual QA', () => {
     // Save screenshot
     await page.screenshot({ path: 'tests/screenshots/mobile-warp-ready.png' });
   });
+
+  test('Capture all planets screenshots', async ({ page }) => {
+    test.setTimeout(90000);
+    for (let i = 0; i < 5; i++) {
+      await page.goto('/');
+      await page.evaluate((index) => {
+        localStorage.clear();
+        localStorage.setItem('fluffy_explorer_save', JSON.stringify({
+          planetIndex: index,
+          completedPlanetsCount: index,
+          customization: {
+            color: '#FFB7B2',
+            accessory: 'none'
+          }
+        }));
+      }, i);
+      await page.goto('/');
+      await page.waitForTimeout(3000);
+      await page.screenshot({ path: `tests/screenshots/planet-${i + 1}.png` });
+    }
+  });
 });

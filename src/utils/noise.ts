@@ -197,7 +197,7 @@ export interface QuestLocations {
   summitAltarQuat: THREE.Quaternion;
 }
 
-export function getQuestLocations(seed: number, baseRadius: number = 22, maxHeight: number = 4): QuestLocations {
+export function getQuestLocations(seed: number, baseRadius: number = 22, maxHeight: number = 4, waterRadius: number = 21.2): QuestLocations {
   const rand = new SeededRandom(seed + 777);
   const result: QuestLocations = {
     flowers: [],
@@ -230,17 +230,19 @@ export function getQuestLocations(seed: number, baseRadius: number = 22, maxHeig
       if (distFromNorth < minDistFromNorth) continue;
 
       const h = getPlanetHeight(dir, seed, baseRadius, maxHeight);
-      if (h > baseRadius + 0.15) { // Land only
+      if (h > waterRadius + 0.15) { // Land only
         return {
           pos: dir.multiplyScalar(h),
           dir: dir.clone().normalize(),
         };
       }
     }
-    // Fallback
+    // Fallback on land
+    const defaultDir = new THREE.Vector3(0, 1, 0);
+    const defaultH = Math.max(waterRadius + 0.5, getPlanetHeight(defaultDir, seed, baseRadius, maxHeight));
     return {
-      pos: new THREE.Vector3(0, baseRadius + 1, 0),
-      dir: new THREE.Vector3(0, 1, 0),
+      pos: defaultDir.clone().multiplyScalar(defaultH),
+      dir: defaultDir,
     };
   };
 

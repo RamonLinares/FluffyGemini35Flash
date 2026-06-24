@@ -443,10 +443,10 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
   const propsList = useMemo(() => {
     const rand = new SeededRandom(seed + 99);
     const list = [];
-    const minHeightForLand = baseRadius + 0.15; // Only grow props above sea level
+    const minHeightForLand = theme.waterRadius + 0.15; // Only grow props above sea level
     
     // Generate potential positions
-    const attempts = 120;
+    const attempts = 180;
     for (let i = 0; i < attempts; i++) {
       // Pick a random point on unit sphere
       const theta = rand.next() * Math.PI;
@@ -661,7 +661,7 @@ export const Planet: React.FC<PlanetProps> = ({ seed, theme }) => {
 
       {/* Water / Lava Sphere */}
       <mesh castShadow receiveShadow>
-        <sphereGeometry args={[baseRadius, 32, 32]} />
+        <sphereGeometry args={[theme.waterRadius, 32, 32]} />
         <meshStandardMaterial 
           color={theme.planetType === 'desert' ? '#ff3d00' : theme.waterColor} 
           emissive={theme.planetType === 'desert' ? '#ff1a00' : '#000000'}

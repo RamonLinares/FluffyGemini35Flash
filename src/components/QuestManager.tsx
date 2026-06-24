@@ -9,6 +9,7 @@ interface QuestManagerProps {
   quests: Quest[];
   playerPositionRef: React.MutableRefObject<THREE.Vector3>;
   onQuestUpdate: (questType: string, amount: number) => void;
+  waterRadius: number;
 }
 
 // Synth Sound Player Helper
@@ -83,6 +84,7 @@ export const QuestManager: React.FC<QuestManagerProps> = ({
   quests: _quests,
   playerPositionRef,
   onQuestUpdate,
+  waterRadius,
 }) => {
   const baseRadius = 22;
   const maxHeight = 4;
@@ -120,12 +122,11 @@ export const QuestManager: React.FC<QuestManagerProps> = ({
   }, [seed]);
 
   // --- 1. PROCEDURALLY GENERATE LOCATIONS FOR QUEST ELEMENTS ---
-  // --- 1. PROCEDURALLY GENERATE LOCATIONS FOR QUEST ELEMENTS ---
   const locations = useMemo(() => {
-    const locs = getQuestLocations(seed, baseRadius, maxHeight);
+    const locs = getQuestLocations(seed, baseRadius, maxHeight, waterRadius);
     miniPosition.current.copy(locs.mini);
     return locs;
-  }, [seed]);
+  }, [seed, waterRadius]);
 
   // --- 2. COLLISION & INTERACTION LOOP ---
   useFrame((state, delta) => {

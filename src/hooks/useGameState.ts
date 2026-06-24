@@ -35,6 +35,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
       moonColors: [],
       doubleStars: false,
       civilization: 'ruins',
+      waterRadius: 21.2,
     },
     {
       name: 'Dreamy Lilac',
@@ -52,6 +53,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
       moonColors: ['#fcddec', '#c7ceea'],
       doubleStars: false,
       civilization: 'crystal_spires',
+      waterRadius: 21.0,
     },
     {
       name: 'Peach Horizon',
@@ -69,6 +71,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
       moonColors: [],
       doubleStars: false,
       civilization: 'none',
+      waterRadius: 20.6,
     },
     {
       name: 'Mint Starlight',
@@ -86,6 +89,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
       moonColors: [],
       doubleStars: true,
       civilization: 'steampunk',
+      waterRadius: 21.2,
     },
     {
       name: 'Luminous Nebula',
@@ -103,6 +107,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
       moonColors: ['#c7ceea'],
       doubleStars: true,
       civilization: 'futuristic',
+      waterRadius: 22.4,
     },
   ];
 
@@ -144,6 +149,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
     'none', 'ruins', 'crystal_spires', 'steampunk', 'futuristic'
   ];
   const civilization = civStyles[Math.floor(rand.next() * civStyles.length)];
+  const waterRadius = 20.8 + rand.next() * 1.6; // Varies between 20.8 and 22.4
 
   return {
     name: `Stardust ${index + 1}`,
@@ -161,6 +167,7 @@ function generatePlanetTheme(index: number): PlanetTheme {
     moonColors,
     doubleStars,
     civilization,
+    waterRadius,
   };
 }
 

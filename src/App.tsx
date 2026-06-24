@@ -156,14 +156,14 @@ export const App: React.FC = () => {
 
         {/* Ethereal Lighting Systems */}
         <ambientLight 
-          intensity={1.0} 
+          intensity={0.45} 
           color={planetConfig.theme.skyColor} 
         />
         
         {/* Primary Sun Light */}
         <directionalLight
           position={[12, 28, 12]}
-          intensity={1.2}
+          intensity={1.5}
           color="#ffffff"
           castShadow
           shadow-mapSize-width={1024}
@@ -180,7 +180,7 @@ export const App: React.FC = () => {
         {planetConfig.theme.doubleStars && (
           <directionalLight
             position={[-28, 20, -24]}
-            intensity={0.7}
+            intensity={0.8}
             color="#80deea" // Cyan tint bounce
           />
         )}
@@ -194,20 +194,23 @@ export const App: React.FC = () => {
 
         {/* Ethereal particle clouds */}
         <StardustParticles 
-          count={70} 
+          count={150} 
           seed={planetConfig.seed} 
           color={planetConfig.theme.accentColor} 
         />
 
         {/* Procedural Planet Mesh */}
         <Planet 
+          key={`planet_${planetConfig.seed}`}
           seed={planetConfig.seed} 
           theme={planetConfig.theme} 
         />
 
         {/* Fluffy Player Character (Ball) */}
         <Player
+          key={`player_${planetConfig.seed}`}
           seed={planetConfig.seed}
+          theme={planetConfig.theme}
           color={color}
           accessory={accessory}
           playerPositionRef={playerPositionRef}
@@ -216,14 +219,17 @@ export const App: React.FC = () => {
 
         {/* Quest Manager to handle active objectives and interactions */}
         <QuestManager
+          key={`quests_${planetConfig.seed}`}
           seed={planetConfig.seed}
           quests={quests}
           playerPositionRef={playerPositionRef}
           onQuestUpdate={updateQuestProgress}
+          waterRadius={planetConfig.theme.waterRadius}
         />
 
         {/* Orbit Camera follow locked to planetary coordinates */}
         <GameCamera 
+          key={`camera_${planetConfig.seed}`}
           playerPositionRef={playerPositionRef} 
         />
       </Canvas>
